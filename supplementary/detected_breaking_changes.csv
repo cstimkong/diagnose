@@ -1,0 +1,178 @@
+JavaScript Library,Description,Related_Commits,Related_Update,Related_Issues,related_apis,Detected_Diagnose,Detected_NoRegrets+,Detected_Tsinfer-Node,Detected_Dont_Break
+async,"In queue, priorityQueue, cargo and cargoQueue, the ""event""-style methods, like q.drain and q.saturated are now methods that register a callback, rather than properties you assign a callback to. They are now of the form q.drain(callback). If you do not pass a callback a Promise will be returned for the next occurrence of the event, making them await-able, e.g. await q.drain()",8e3230057cb803e00726f728c3687180296766a7,3.0.0,"#1586, #1641","<async>.{queue,priorityQueue,cargo,cargoQueue}().drain",Yes,Yes,No,Yes
+async,"during and doDuring have been removed, and instead whilst, doWhilst, until and doUntil now have asynchronous test functions.",935a80e559a8630430513ca15f85cbbcd5bc818a,3.0.0,"#850, #1557","<async.{during,doDuring,whilst,doWhilst}",Yes,No,No,No
+async,memoize no longer memoizes errors,139421571d26b458a44f452c46b48230c4277a7a,3.0.0,"#1465, #1466",<async>.memoize,No,No,No,No
+async,"applyEach/applyEachSeries have a simpler interface, to make them more easily type-able. It always returns a function that takes in a single callback argument. If that callback is omitted, a promise is returned, making it awaitable",562bd495d18a1f2a96255d8e6c7d284edae5ec39,3.0.0,"#1228, #1640","<async>.{applyEach,applyEachSeries}",Yes,No,No,No
+async,limits of less than 1 now cause an error to be thrown in queues and collection methods.,61b0bc97e461f923b091e8d0c87f92e308d73eda,3.0.0,"#1249, #1552",,Yes,No,No,No
+async,"Most Async methods return a Promise when the final callback is omitted, making them awaitable!","31e68c3f7ea7c1afe6425379edc16ae088780674, 105fd5d2bd08dbd5c3f29a695b76a18cb159f0d7, 4dbafbafe1747ed0952bac91f58d36f56e8f0c52, f643878ea90c88de16768e42d20aad25dc2f6de0, 0174f3f85b47a7a940865643608482d65fcd62c4, 3a30a9f046859195205f05d36cce5011c14cba98, 01292f5e5f1170fe8948f88b60e488c2274e021c, 39dd9054bcad5864a01609dd77ac78b2aa7bfc33, 4a33ff9790d57c2f669dfcbeede39857f6157281, 4c5358987647bc25792b6b89a0dfd03dcf6bed59, 7df6325fe514df2d1559b624e20876bac48b39ab, f12ce3988357b0a9d4b255acd51173d7c78f0e13, ed2eb6c961177b853fc039be592930617a0b9190, 94c411ce4af58ebda007d8dcb0956d5be19d78c5, e5f01b89b95d781e63b988595727d143b494a566, ab7ccd148fcbbd0e56acca628a5c78b419852410, 68363dc92e4601418873d974d08c763c9f969432, 6e07f6c5f4f2abe844d47651a03a449f864a5190, 0c7493423b60246f987d106d1f040e83de5196f7",3.0.0,#1572,<async>.*,Yes,No,No,No
+async,"Calling a callback more than once is considered an error, and an error will be thrown. This had an explicit breaking change in waterfall",d2fe2b323820f4fbce268ade71435d58088118bb,2.0.0,"#814, #815, #1048, #1050",<async>.waterfall,No,No,No,No
+async,"auto task functions now always take the callback as the last argument. If a task has dependencies, the results object will be passed as the first argument.",45e4d8c73c35401ac2c9eb2d600ac3a5c4e82fc9,2.0.0,"#1036, #1042",<async>.auto,Yes,Yes,Yes,No
+async,"map used to return an object when iterating over an object. map now always returns an array, like in other libraries.",5f6e76d9659c992a37b9ec488d6aff58652b918a,2.0.0,"#1157, #1177",<async>.map,Yes,No,Yes,No
+async,"filter, reject, some, every, detect and their families like {METHOD}Series and {METHOD}Limit now expect an error as the first callback argument, rather than just a simple boolean. Pass null as the first argument, or use fs.access instead of fs.exists.",9e9a0879e815d812c246597a6e0dec77776c1fdf,2.0.0,"#774, #1028, #1041",,Yes,No,No,No
+async,"retry's callback is now optional. Previously, omitting the callback would partially apply the function, meaning it could be passed directly as a task to series or auto. The partially applied ""control-flow"" behavior has been separated out into retryable.",831f37f2a27ec262159190fa3165d428010c7813,2.0.0,"#1054, #1058",,Yes,Yes,No,No
+async,The q.tasks array has been renamed q._tasks and is now implemented as a doubly linked list (DLL). Any code that used to interact with this array will need to be updated to either use the provided helpers or support DLLs,592f95cf1c90d71dfdb68f4e4c9ca0cdd30a91bc,2.0.0,#1205,,Yes,No,No,No
+moment,"relativeTimeThreshold keys are now changed to 's', 'm', 'h', 'd' and 'M'. Also the actual thresholds for changed",bc84a173db84f43a7b9b7e0d2da8df4dcb42dc36,3.0.0,#1642,<moment>().add,Yes,Yes,Yes,Yes
+joi,"In the previous versions, with convert set to true, Joi supported the use of equivalent values for true or false, namely ""true"", ""false"", ""yes"", ""no"", ""on"", ""off"", 1, 0, ""1"" and ""0"". This is not the case anymore, it will only support true, false, ""true"" and ""false"" by default, with the possibility to disable string conversion by using strict(). ",2eaeb4f9ebcc374f5ab74fb5c496209c5c5af77c,10.0.0,"#991, #998",,No,No,No,No
+joi,Fix boolean strings parsing.,b14693f92fc1c3a761befbd19462c0c843194589,10.0.0,#1065,,No,No,No,No
+joi,"Disable html escaping by default, leave it as an option",ba5f3c9866e33231fbc1336017f80ad3e9f202c7,12.0.0,#921,,No,No,No,No
+joi,stripUnknown: true defaults to not strip array items,e7cf7263965567eb3cca6afe4a3382ea8c142ef1,14.0.0,#1614,,No,No,No,No
+joi,Stricter and safer parsing of numbers,11afe3578d701251ab07b7a15bdc1ee174cafe7e,14.0.0,"#1113, #1504, #1544",,No,No,No,No
+joi,Fixed output result of Joi.string().valid(...).insensitive(),67ae9687405337e04b8d6101bf06fe5229dc36fe,14.0.0,#1191,<joi>.string().valid().intensitive(),No,No,No,No
+joi,Nested paths on object.or/nand/and/xor/with/without(),066afc6d1320850dd05b3d8ad664d2852822d737,14.0.0,"#1477, #1554",,No,No,No,No
+joi,Lazy schemas are now less lazy by default,f225d916449c68ab78b18f2439c02f77d4216455,14.0.0,#1258,,Yes,No,No,No
+joi,array.min/max/length will be overridden by last call,674a59e9800553a2395f827c29d4a49b82583d83,14.0.0,#1127,"call <joi>.array().{min,max,length}",No,No,No,No
+joi,Correctly apply labels to alternatives schemas,7e0fea837fdc2d5bc938987dc4f12ad9ccde211c,14.0.0,#1364,,No,No,No,No
+joi,Error message override is also applied to individual errors,3baeda0d2316a3d050d998ccca4f9d440cb0d869,14.0.0,#1568,,No,No,No,No
+joi,"Joi.string().email() options changed. The following options are no longer supported:
+checkDNS (remains unsupported)
+errorLevel - unsupported with no replacement. The new validation rules treat quoted-strings, comments, obsolete formats, and domain literals as errors.
+minDomainAtoms - use minDomainSegments.
+tldBlacklist - use tlds.deny instead.
+tldWhitelist - use tlds.allow instead.",7e172c14b439906f638f54d77d3317fbd72dd023,15.0.0,#1776,call <joi>.string().email,Yes,Yes,No,No
+joi,Remove isJoi from schema (use Joi.isSchema() instead),cd77ba58066a04e6df9f28bd82a0314a9ea8c9bb,16.0.0,#1834,,Yes,Yes,No,Yes
+joi,Only execute coerce extensions when convert is true,b166b71c9d12e44e0aef0c19f4e13c1968a47438,16.0.0,#1835,,No,No,No,No
+joi,Apply array.single() regardless of convert,b166b71c9d12e44e0aef0c19f4e13c1968a47438,16.0.0,#1836,,No,No,No,No
+joi,Change object and array errors to use full path instead of nested error messages,6182a9b13a74286bd5cfcef1481e1c3555569266,16.0.0,#1843,,No,No,No,No
+joi,Remove Hoek.reach() options from Joi.ref(),c64b41f85d654c9b3c2878ab73d76bf664bcb25d,16.0.0,"#1839, #1695",,No,No,No,No
+joi,Limit array.single() to only allow non-array items,dd84fc3166b060ab4b4e9f1be72ebbf9151bbc20,16.0.0,#1840,,Yes,No,No,No
+joi,Forbid chaining when() calls when the first was not on alternatives type,a8c916ed37a8d8ef757b0083bbe9e2b3d81e30fe,16.0.0,#1848,,No,No,No,No
+joi,Remove any.error() options,b924baa66e648a6764b57a1e56b74076b2b7c1f9,16.0.0,#1857,,No,No,No,No
+joi,Remove this from any.error() function calls,b924baa66e648a6764b57a1e56b74076b2b7c1f9,16.0.0,#1858,,No,No,No,No
+joi,Remove any.createOverrideError(),b924baa66e648a6764b57a1e56b74076b2b7c1f9,16.0.0,#1859,<joi>.any().createOverrideError,Yes,No,Yes,No
+joi,Renamed options() to preferences(),,16.0.0,#1867,<joi>.any.options,Yes,Yes,Yes,Yes
+joi,any.error() only supports an Error or a function that returns a single Error (drop support for a function that returns string or array or errors,,16.0.0,#1869,,Yes,No,No,No
+joi,Errors paths only include the edge label,,16.0.0,#1875,,No,No,No,No
+joi,"Change object.rename('a', 'b', { override: true }) to not delete existing key b if a does not exist ",,16.0.0,#1886,,No,No,No,No
+joi,The reference returned from Joi.ref() was changed from a function to object with ref.resolve() method,,16.0.0,#1888,,Yes,No,No,No
+joi,Move the escapeHtml preference under errors.escapeHtml,a5ceb30a87a3d8d488fd0a0dda19e4026ba470a4,16.0.0,#1905,,No,No,No,No
+joi,Change the format of references in error messages,ba300a16681dcd51cd54a9b106498c86b0c78273,16.0.0,#1892,,No,No,No,No
+joi,Error messages require # prefix for error local context arguments ({{label}} -> {{#label}}),4ebeffd60d47d677151c6486ac36dde3a3544641,16.0.0,#1983,,No,No,No,No
+joi,Remove isJoi from Errors.Report,ba300a16681dcd51cd54a9b106498c86b0c78273,16.0.0,#1895,,Yes,No,Yes,No
+joi,Move language.wrapArrays to errors.wrapArrays preference,cf1e292272695596a7501e602c2621d4235055d7,16.0.0,"#1901, #1905",call <joi>.validate,Yes,No,Yes,No
+joi,Rename language preference to messages,cf1e292272695596a7501e602c2621d4235055d7,16.0.0,#1902,,Yes,No,No,No
+mongoose,aggregate() no longer accepts a spread,cc4c95961efe2c0671fb6fff7c39282ef94f9158,5.0.0,#2716,,No,No,No,No
+mongoose,"make Document#populate() return a promise if a callback isn't passed, remove execPopulate()",2fe9077b8f16b7c794574f76b444d888536596d5,6.0.0,"#3834, #3836",,Yes,No,No,No
+mongoose,deleteX() and remove() promise resolves to the write object result,be6fcdaa295ae3d37aa0111e1d2b130e0476f9f2,5.0.0,#4013,,No,No,No,No
+mongoose,toObject() and toJSON() option parameter merges with defaults rather than overwriting,6517301b2be66db99972ceb5e0f6bb4bed54d8ed,5.0.0,#4131,,No,No,No,No
+mongoose,BREAKING CHANGE: don¡¯t execute getters in reverse order,9a2e32507ca67b785b429845df6c707b8f4df78f,5.0.0,#4835,<mongoose>.SchemaType.prototype.applyGetter,No,No,No,No
+mongoose,"remove saveErrorIfNotFound, always error out if save() did not update a document",c7be9a321550cdf0ee64ec8f1469e6f2b8694d1b,5.0.0,#4973,<mongoose>.Document.prototype.$__save,No,No,No,No
+mongoose,"Remove support for $pushAll, remove usePushEach option",82aeba514ec1611502dc221bf3f09b697f747966,5.0.0,#5670,,No,No,No,No
+mongoose,Always use mongoose  aggregation cursor when using.aggregate().cursor(),99477b6867bfaf6ae5b93b936be4cba55345558f,5.0.0,#5941,,Yes,No,No,No
+mongoose,Attach query middleware to prototype rather than in constructor,0aa7cb5f8eeff5da82b6858926e224e473a5c619,5.0.0,#5939,,No,No,No,No
+mongoose,"remove passRawResult, only allow rawResult",79ea021abda77cf0a541df8645b354b2c6cf01ec,5.0.0,#5869,,Yes,No,No,No
+mongoose,mapReduce resolves to an object with 2 keys rather than 2 separate args,63f31648d1f6adbaf4f898a3ca9f537186441ed8,5.0.0,#5816,,No,No,No,No
+mongoose,"remove legacy async validator support, and support custom error messages via throw new Error()",19e3b793dc6078117aecf2cc5b329e53162212d2,5.0.0,#5824,,No,No,No,No
+mongoose,make mongoose.connect() always return a promise,08258d34436e7dc9945d9efc0536ae9a78625126,5.0.0,#5796,,Yes,No,No,No
+mongoose,"remove open(), openSet(), stream()",dda165eebdb241397e9990440dc8e9c1f733db76,5.0.0,#5795,,Yes,No,No,No
+mongoose,"use $push with $each instead of $pushAll, drop support for $pushAll",82aeba514ec1611502dc221bf3f09b697f747966,5.0.0,#5670,,Yes,No,No,No
+mongoose,"Make document set() set keys in the order they're defined in the schema, not in the user specified object",ac96e662c55889e46e17905a976bc0352442e020,5.0.0,#4665,call <mongoose>.Document.prototype.$set,No,No,No,No
+mongoose,"Make connections not thenable, add Connection#asPromise() to use a connection as a promise",09e1399b91bf8b7f413ba649e16d0933d6b07d25,6.0.0,#8810,<mongoose>.Connection.prototype.openUri,Yes,No,No,No
+mongoose,Throw an error if the same query object is executed multiple times,3f52dfbe8ff0f9942148d92584106e5604660d54,6.0.0,#7398,<mongoose>.Query.prototype.*,Yes,No,No,No
+mongoose,"Make schema paths declared with type: { name: String } create a single nested subdoc, remove typePojoToMixed because it is now always false",a51fbcc3442204895ae97e68b6d547be8d4b2f5c,6.0.0,#7181,,No,No,No,No
+mongoose,make setDefaultsOnInsert true by default. Set to false to disable it,9d2a6be69686add7d83b462664d1f01104f449ee,6.0.0,#8410,,Yes,No,No,No
+mongoose,"remove context option for queries, always use context: 'query'",8b7f7f9dc40a2aa5439fdb35fff95848e2221405,6.0.0,#8395,,Yes,Yes,No,No
+mongoose,"Aggregate#cursor() now returns aggregation cursor, rather than aggregate instance ",218c7f470d1fd53944416510a758c229cce33dff,6.0.0,#10410,,Yes,No,No,No
+mongoose,"remove useFindAndModify option, always use MongoDB's native findOneAndReplace() rather than legacy findAndModify()",7fbe43b6192acc8923888c8c31a2ba5624364c6d,6.0.0,#8737,,Yes,Yes,No,No
+mongoose,rename Embedded/SingleNestedPath -> Subdocument/SubdocumentPath,aa886580e9cc43fcc280c5cac1abb4a88906b9b5,6.0.0,#10419,,Yes,No,No,No
+mongoose,"call setters with priorVal as 2nd parameter, and with new subdocument as context if creating new document",fef9f8ea214a740c0cc481080c8c327eef8bd2aa,6.0.0,#8629,,Yes,No,No,No
+mongoose,pass document as first parameter to default functions,cf43e8d0bd795875b52f9043e8c68dbc4e5e5864,6.0.0,"#9633, #9701",,Yes,No,No,No
+mongoose,rename Query#map() -> Query#transform() to avoid conflating with Array#map() and chaining,5b3a677ae959607c9ccdb3bc4d2ea1207e9c7eea,6.0.0,"#7951, #9830",,Yes,No,No,No
+mongoose,"remove Aggregate#addCursorFlag(), use Aggregate#options() instead",fb7605a9f2a0deda8a042f310584995a58be7f8f,6.0.0,#8701,,Yes,No,No,No
+mongoose,Make Aggregate#model() always return a model rather than an aggregate instance,17de9d3dba998f4d5421faa0fd71a5d20758e44a,6.0.0,#7702,,Yes,No,No,No
+mongoose,remove omitUndefined option for updates - Mongoose now always removes undefined keys in updates,63083fe626d50c73783b87b9e03ee067799f81ee,6.0.0,#7680,,Yes,No,No,No
+mongoose,"remove Aggregate#addCursorFlag(), use Aggregate#options() instead",fb7605a9f2a0deda8a042f310584995a58be7f8f,6.0.0,#8701,<mongoose>.Aggregate.prototype.addCursorFlag,Yes,No,No,No
+mongoose,"remove storeSubdocumentValidationError schema option, never store subdocument ValidationErrors",354299f30a9f4bfd2671372c3c81dc049aeedb18,6.0.0,#5226,,No,No,No,No
+mongoose,make find() with explain() return object instead of an array,2e2512ebd1079b5c1b00d0566022644b831537a8,6.0.0,#8551,<mongoose>.Query.explain,Yes,No,No,No
+mongoose,allow undefined in number arrays unless required,413b95766586091c27b7aa381d3c0d02aa07fcdd,6.0.0,#8738,,No,No,No,No
+mongoose,"remove safe-buffer, make MongooseBuffer extend from native Buffer",2cd77943195775145d9f2cf5329a05d187b90123,6.0.0,#9199,,Yes,No,No,No
+mongoose,"remove useNestedStrict, use nested schema strict mode when casting updates unless strict is explicitly specified in query options",dd122fe9b17641a89244d93330a9dc460911c34b,6.0.0,#8961,,No,No,No,No
+mongoose,"make pluralize convert ""goose"" to ""geese""",bb28759a3bbfdb37ac3ad765bbffc88e91f9a46a,6.0.0,#9278,,Yes,No,No,No
+mongoose,"the Schema#noId option is now removed, please use _id instead",0fdf4cd28a95b56efaf38b6f4f3e212d99e92529,6.0.0,#9398,,No,No,No,No
+mongoose,createdAt schema path is now immutable by default,0d8961f296f7b21e35f0a13c62acaf0fc62608a6,6.0.0,#10139,,No,No,No,No
+mongoose,remove isAsync option for validators in favor of checking if a function is an async function,550e8ce384b38eaf8a21d72fc9b6ea8804232407,6.0.0,#10502,,Yes,Yes,No,No
+immutable,No longer use value-equality within merge() and no longer deeply coerce argument to merge(),ad52d543fd8d1c6aa8038b9f1a4fb2124f094e92,4.0.0,"#1391, #1339",,No,No,No,No
+immutable,"Replace incompatible collections when merging nested data, and Concat Lists when merging deeply",11952b672648ab420a853d85bc2a50a41bd1ef0c,4.0.0,#1840,,Yes,No,No,No
+immutable,concat Lists when merging deeply,6048b7967b9740ddd57adc684048fbaba62e8e54,4.0.0,#1344,,No,No,No,No
+immutable,Remove IteratorSequence. Do not attempt to detect iterators in Seq(),01b7c28ed38296b89e99c92fc50e77988cf496c5,4.0.0,#1589,,Yes,No,No,No
+immutable,Remove Seq.of(),932a0f5e40995708936f954f8de7b035009850cd,4.0.0,"#1310, #1311",<immutable>.Seq.of,Yes,Yes,Yes,Yes
+immutable,KeyedCollection.toArray() returns array of tuples.,a66a1561a8c16c4abf2f406af74c3aa505d4e0a7,4.0.0,#1340,<immutable>.Collection.Keyed.prototype.toArray,No,No,No,No
+immutable,list.concat() now has a slightly more efficient implementation and map.concat() is an alias for map.merge(),649db238a16a5bb8d669d8a895b9f53e4cc314d5,4.0.0,#1373,<immutable>.Collection.Index.prototype.concat,No,No,No,No
+immutable,"The Iterable class has been renamed to Collection, and isIterable() has been renamed to isCollection(). Aliases with the existing names exist to make transitioning code easier.",446e720cb7d760b0968fc86d4a16c4bebf8c6294,4.0.0,#1139,,Yes,No,Yes,No
+immutable,"The sequence API (such as map, filter, forEach) no longer exist on Records, delete() and clear() no longer exist on Records.",,4.0.0,,,Yes,No,No,No
+immutable,Plain Objects and Arrays are no longer considered opaque values,e35f5fed7d1eb72795b8a87ec34185db26a75591,4.0.0,#1369,,No,No,No,No
+immutable,"The toJSON() method performs a shallow conversion (previously it was an alias for toJS(), which remains a deep conversion)",bec87bd29335acbf2994d79da5ca31202ddbf0f5,4.0.0,,<immutable>.Collection.prototype.toJSON,Yes,No,No,No
+immutable,"Map constructor no longer takes an array, resulting in numeric keys.",51f442069b45a560df669a7289ec5f2c94929b20,4.0.0,,<immutable>.Map,Yes,No,No,No
+immutable,"The ""predicate"" functions, isCollection, isKeyed, isIndexed, isAssociative have been moved from Iterable to the top level exports.",,4.0.0,,"<immutable>.{isCollection,isKeyed,isIndexed,isAssociative}",Yes,No,Yes,No
+immutable,Range function needs at least two defined parameters,a19e2f5a4d9eac7ae01af9d19d6c40f2bedfe691,5.0.0,#1967,,Yes,No,No,No
+uuid,Remove .parse and .unparse,5ae7287fc935eb55ef39133e4be17ef623ca000e,3.0.0,,"<uuid>.{parse,unparse}",Yes,Yes,Yes,Yes
+node-fetch,"response.text() no longer attempts to detect encoding, instead always opting for UTF-8 (per spec);",,2.0.0,,<node-fetch>.Response.prototype.text,No,No,No,No
+node-fetch,make response.json() throw error instead of returning an empty object on 204 nocontent respose,,2.0.0,,<node-fetch>.Response.prototype.json,Yes,No,No,No
+node-fetch,internal methods are no longer exposed,,2.0.0,,"<node-fetch>.{_clone,_decode,_convert}",Yes,No,No,No
+node-fetch,throw error when a GET or HEAD Request is constructed with a non-null body,,2.0.0,,<node-fetch>,Yes,No,No,No
+node-fetch,remove headers.getAll(); make get() return all headers delimited by commas,,2.0.0,,<node-fetch>.Headers.prototype.getAll,Yes,No,No,No
+node-fetch,make sure header names and values are valid in HTTP,,2.0.0,,"<node-fetch>.Headers.prototype.{set,append,has,delete}",No,No,No,No
+node-fetch,add response.arrayBuffer() (also applies to Requests),,2.0.0,,<node-fetch>.Response.prototype.arrayBuffer,Yes,No,No,No
+node-fetch,The `timeout` option was removed,94e5b92de1d7bb3506ac6487581963a327e00d22,3.0.0,,<node-fetch>,Yes,Yes,No,No
+node-fetch,`Response.statusText` no longer sets a default message derived from the HTTP status code,,3.0.0,,<node-fetch>.Response.prototype.statusText,Yes,No,No,No
+node-fetch,Dropped the `res.textConverted()` function,,3.0.0,,<node-fetch>.Response.prototype.textConverted,Yes,No,No,No
+node-fetch,JSON parsing errors from `res.json()` are of type `SyntaxError` instead of `FetchError`,,3.0.0,,<node-fetch>.Response.prototype.json,Yes,No,No,No
+node-fetch,Arbitrary URLs are no longer supported,,3.0.0,,<node-fetch>,No,No,No,No
+node-fetch,`req.body` can no longer be a string,,3.0.0,,<node-fetch>.Request.prototype.body,Yes,No,No,No
+node-fetch,Changed default user agent,b3878b9a3e42ab4f2362ecc24790ee6a689edb2e,3.0.0,#818,,No,No,No,No
+winston,winston.Logger has been replaced with winston.createLogger,,3.0.0,,<winston>.Logger,Yes,Yes,No,No
+winston,winston.setLevels has been removed. Levels are frozen at the time of Logger creation,,3.0.0,,<winston>.setLevels,Yes,No,No,No
+winston,winston.transports.Memory was removed. Use any Node.js stream.Writeable with a large highWaterMark instance instead,,3.0.0,,<winston>.transports.Memory,Yes,No,No,No
+winston,When writing transports use winston-transport instead of winston.Transport,,3.0.0,,<winston>.Transport,No,No,No,No
+winston,"In winston.transports.Console, output for all log levels are now sent to stdout by default. - stderrLevels option now defaults to []. - debugStdout option has been removed",,3.0.0,,<winston>.transports.Console,Yes,No,No,No
+winston,winston.Container instances no longer have default Console transport,,3.0.0,,<winston>.Container,Yes,No,No,No
+winston,winston.Container.prototype.add no longer does crazy options parsing. Implementation inspired by segmentio/winston-logger,,3.0.0,,<winston>.Container.prototype.add,No,Yes,No,No
+winston,"winston.Logger.log and level-specific methods (.info, .error, etc) no longer accepts a callback. The vast majority of use cases for this feature was folks awaiting all logging to complete, not just a single logging message",,3.0.0,,"<winston>.Logger.{log,info,error,warn}",Yes,No,No,No
+winston,winston.Logger.add no longer accepts prototypes / classes. Pass an instance of our transport instead.,,3.0.0,,"<winston>.Logger.{log,info,error,warn}",Yes,No,No,No
+winston,Logger.prototype.stream - options.transport is removed. Use the transport instance on the logger directly,,3.0.0,,<winston>.Logger.prototype.stream,Yes,No,No,No
+winston,Logger.prototype.query - options.transport is removed. Use the transport instance on the logger directly.,,3.0.0,,<winston>.Logger.prototype.query,Yes,No,No,No
+winston,winston.exception has been removed,,3.0.0,,<winston>.exception,Yes,No,No,No
+winston,winston.hash was removed,,3.0.0,,<winston>.hash,Yes,No,No,No
+winston,winston.common.pad was removed.,,3.0.0,,<winston>.common.pad,Yes,No,No,No
+winston,winston.common.serialized was removed,,3.0.0,,<winston>.common.serialized,Yes,No,No,No
+winston,winston.common.log was removed,,3.0.0,,<winston>.common.log,Yes,No,No,No
+winston,"Removed winston.transports.{File,Console,Http} formatting options",,3.0.0,,"<winston>.transports.{File,Console,Http}",Yes,No,No,No
+winston,Migrating filters and rewriters to formats in winston@3,,3.0.0,,"<winston>.{rewriters,filters}",Yes,No,No,No
+winston,Move winston.transports.DailyRotateFile into a separate module: require('winston-daily-rotate-file'),0f822042508fe964d9b0ab15b27f6e7fa9be487a,2.0.0,,,Yes,No,No,Yes
+winston,Change the method signature to a filter function to be consistent with rewriter and log functions.,8cd836880f5bde0a8dac229ba474fc1f47d643ad,2.0.0,,,No,No,No,No
+execa,"When the encoding option is 'buffer', the output (result.stdout, result.stderr, result.all) is now an Uint8Array instead of a Buffer",078cea6a5e17e71c065e3e898562136a8753500b,9.0.0,#586,call <execa>(),No,No,No,No
+execa,Renamed some of the allowed values for the encoding option,477bbc4ed9d0a18933d3dd4b0aeecdb0e312c1ad,9.0.0,"#586, #928",call <execa>(),No,No,No,No
+execa,"Passing a file path to subprocess.pipeStdout(), subprocess.pipeStderr() and subprocess.pipeAll() has been removed. Instead, a {file: './path'} object should be passed to the stdout or stderr option.",4179909ea1613d6b86b3f27df27270ebbc205585,9.0.0,"#752, #744","<execa>('node', ['file.js']).{pipeStdout,pipeStderr}",Yes,No,No,Yes
+execa,Renamed error.killed to error.isTerminated,4ab2bdbbdbb49f19444c15ba04f6cb76d065fb9d,9.0.0,#625,,No,No,No,No
+execa,Renamed the signal option to cancelSignal,aa6ffdfb5cee31cc3936146a6483998f6540ee60,9.0.0,#880,"<execa>('node', ['file.js'], {signal: 0})",No,Yes,No,No
+execa,subprocess.cancel() has been removed. Please use either subprocess.kill() or the cancelSignal option instead.,917ad1e807bd30cd9dd0396af418f76001101772,9.0.0,#711,"<execa>('node', ['file.js']).cancel",Yes,No,No,Yes
+execa,"Renamed the forceKillAfterTimeout option to forceKillAfterDelay. Also, it is now passed to execa() instead of subprocess.kill()",ee57aff4942416eb023bfcbd89cc9dce15448337,9.0.0,"#714, #723","call <execa>, call <execa>().kill",Yes,No,No,No
+execa,The verbose option is now a string enum instead of a boolean. false has been renamed to 'none' and true has been renamed to 'short',eda065c4872721530dc266ac4897572d271d36ac,9.0.0,#884,call <execa>,Yes,No,No,No
+execa,"The execPath option has been renamed to nodePath. It is now a noop unless the node option is true. Also, it now works even if the preferLocal option is false",76710ac02b942810e49d7030cfaecce07426dbe4,9.0.0,"#812, #815","call <execa>('node', ['file.js'], {verbose: false})",Yes,Yes,No,No
+execa,"The default value for the serialization option is now 'advanced' instead of 'json'. In particular, when calling subprocess.send(object) with an object that contains functions or symbols, those were previously silently removed. Now this will throw an exception. ",396548b5f40a5cfd00421d8e077ca3abfcb26d02,9.0.0,#905,<execa>().send({example: function() { } }),Yes,No,No,No
+execa,Signals passed to subprocess.kill() and to the killSignal option cannot be lowercase anymore. ,4650d5c702091ae889d71c700a08a8fe0b55d405,9.0.0,#1025,"<execa>('node', ['file.js'], {killSignal: 'sigterm'})",No,No,No,No
+execa,The all property is now undefined unless the all option is set to true.,d221e532dc2bfe45a1a2237e601460016c0c93aa,3.0.0,#353,,No,No,No,No
+execa,error.exitCodeName has been removed.,5d011edea4db60512321ea4873f1d041103f3f1a,3.0.0,#375,,Yes,No,No,No
+jsonwebtoken,The verify() function no longer accepts unsigned tokens by default,834503079514b72264fd13023a3b8d648afd6a16,9.0.0,#851,"<jsonwebtoken>.verify(unsigned, undefined)",No,No,No,No
+jsonwebtoken,RSA key size must be 2048 bits or greater,,9.0.0,#852,"<jsonwebtoken>.sign({ foo: 'bar' }, privateKey, { algorithm: 'RS256' })",No,No,No,No
+find-up,Return undefined instead of null when the path cannot be found ,a7a9500b1ed48628452976cc6303932f25ceb623,4.0.0,,,Yes,No,No,No
+find-up,"Add ability to specify if looking for file or directory, It now only matches files by default, not also directories. Previously it would match either.",da17a221ef1151afa34fc4f7da148ea4f3b931ff,4.0.0,#40,<find-up>(''),No,No,No,No
+fast-deep-equal,NaN are equal,94007f33fe228385ba0d9c1299ac02166aeb3a6b,2.0.0,#18,,Yes,No,No,No
+fast-deep-equal,Different functions are not equal,ba63e03fd12f1fc5532eed629859c18436b29b0a,2.0.0,#11,,Yes,No,No,No
+js-tokens,"'/a/s'.match(jsTokens) no longer returns ['/', 'a', '/', 's'], but ['/a/s']. (There are of course other variations of this.)",9d18b7ea07744e2f4dfbeb46ce557a4a65b44ade,4.0.0,,,No,No,No,No
+js-tokens,code that rely on some token objects not having the closed property could now behave differently.,9d18b7ea07744e2f4dfbeb46ce557a4a65b44ade,4.0.0,,,Yes,No,No,No
+js-tokens,"'**'.match(jsTokens) no longer returns ['*', '*'], but ['**']",727d38b70c3e6a93c0147b92188b92af54c33045,2.0.0,,,No,No,No,No
+js-tokens,"'**='.match(jsTokens) no longer returns ['*', '*='], but ['**=']",727d38b70c3e6a93c0147b92188b92af54c33045,2.0.0,,,No,No,No,No
+express,remove connect and connect¡¯s patches except for charset handling,,4.0.0,,,No,No,No,No
+express,remove bodyParser middleware,855d1e2bf562e543557bae0e8def5f02bda971d9,4.0.0,#1795,,No,No,No,No
+express,remove all bundled middleware except static,,4.0.0,,,No,No,No,No
+express,remove express.createServer() - it has been deprecated for a long time. Use express(),f56a5f01c46677320cb9efa09800af13de1790d9,4.0.0,,,Yes,Yes,No,Yes
+express,remove app.configure - use logic in your own app code,ac2cbef8be60f7c58cf5ff27ff42397171825e57,4.0.0,#936,,Yes,No,No,No
+express,remove app.router,f41d09a3cf0592b65a1359495b65d3d7cf949c50,4.0.0,#1909,,Yes,No,No,No
+express,remove req.auth - use basic-auth instead,68996d7561f911856dd2fab18e6b5f3def074e0b,4.0.0,,,Yes,No,No,No
+express,Change req.params to an object,c6c71abf4d4d6b10e040d0ee9e09ce304b172fff,4.0.0,#1835,,No,No,No,No
+express,remove req.accepted* - use req.accepts*() instead,,4.0.0,#2171,,Yes,No,No,No
+express,remove res.charset - include the charset in the content type when using res.set(),2064f412cbadfe64e84f8a40f3edb0c2a98bb34d,4.0.0,,,Yes,No,No,No
+express,change app.route -> app.mountpath when mounting an express app in another express app,,4.0.0,,,Yes,No,No,No
+express,change req.accepts* -> req.accepts*s - i.e. req.acceptsEncoding -> req.acceptsEncodings,59f2b4048a4d08e076b06ffd36f29825a023b52a,4.0.0,#2237,<express>.request.acceptsEncoding,Yes,No,No,No
+express,change res.locals is no longer a function. It is a plain js object. Treat it as such,4983c38298d1c6dad1a8a09241cf8beee66beb7e,4.0.0,#1908,,Yes,No,No,No
+fill-range,The `fn` argument of fillRange is removed,,3.0.0,,,Yes,No,No,No
