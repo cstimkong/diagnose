@@ -21,6 +21,7 @@
     "@babel/plugin-transform-shorthand-properties": "^7.25.9",
     "@babel/traverse": "^7.25.9",
     "@babel/types": "^7.26.0",
+    "ajv": "^8.17.1",
     "append-transform": "^2.0.0",
     "deep-equal": "^2.2.3",
     "immutable": "^4.0.0",
