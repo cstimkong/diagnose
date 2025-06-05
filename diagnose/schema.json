@@ -37,6 +37,10 @@
                 "id": {
                     "type": "number",
                     "minimum": 0
+                },
+                "createdFromNodeId": {
+                    "type": "number",
+                    "minimum": -1
                 }
             },
             "oneOf": [
