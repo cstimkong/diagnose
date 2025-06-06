@@ -57,7 +57,7 @@ let argv = yargs(hideBin(process.argv)).usage('Reconstruct graph for a given lib
         } else {
             if (!Object.hasOwn(node, 'obj')) {
                 node.obj = obj;
-                workList.push(node.nodeId);
+                workList.push(node.id);
             }
         }
     }
@@ -70,7 +70,7 @@ let argv = yargs(hideBin(process.argv)).usage('Reconstruct graph for a given lib
         
             n.obj = require(argv.library);
             revert();
-            workList.push(n.nodeId);
+            workList.push(n.id);
         }
     }
 
@@ -79,7 +79,7 @@ let argv = yargs(hideBin(process.argv)).usage('Reconstruct graph for a given lib
             return;
         }
 
-        if (!Object.hasOwn(nodeList[nodeId], 'obj')) {
+        if (nodeList[nodeId].nodeType !== 'type' && !Object.hasOwn(nodeList[nodeId], 'obj')) {
             reconstruct(nodeList[nodeId].createdFrom.nodeId);
         }
 
