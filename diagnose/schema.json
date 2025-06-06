@@ -38,9 +38,15 @@
                     "type": "number",
                     "minimum": 0
                 },
-                "createdFromNodeId": {
-                    "type": "number",
-                    "minimum": -1
+                "createdFrom": {
+                    "properties": {
+                        "nodeId": {
+                            "type": "number"
+                        },
+                        "edgeId": {
+                            "type": "number"
+                        }
+                    }
                 }
             },
             "oneOf": [

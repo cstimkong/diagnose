@@ -57,6 +57,7 @@ let argv = yargs(hideBin(process.argv)).usage('Reconstruct graph for a given lib
         } else {
             if (!Object.hasOwn(node, 'obj')) {
                 node.obj = obj;
+                workList.push(node.nodeId);
             }
         }
     }
