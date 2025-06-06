@@ -1,5 +1,5 @@
 
-## The Monorepo of Diagnose and Other Breaking Change Detection Tools (WIP)
+## *(Working in Progress)* The Monorepo of Diagnose and Other Breaking Change Detection Tools
 
 This repository contains the implementations of JavaScript breaking change detection tools `Diagnose` and `NoRegrets+`, as well as the type differencing tool based on `Tsinfer-node`.
 
