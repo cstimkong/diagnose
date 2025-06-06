@@ -3,12 +3,11 @@
  */
 
 'use strict'
-const process = require('process')
-const wrapCode = require('./wrap-code')
-const {addHook} = require('pirates')
-const yargs = require('yargs/yargs')
-const {hideBin} = require('yargs/helpers')
-const {evalObject} = require('./utils')
+const process = require('process');
+const wrapCode = require('./wrap-code');
+const {addHook} = require('pirates');
+const yargs = require('yargs/yargs');
+const {hideBin} = require('yargs/helpers');
 const pretty = require('pino-pretty');
 const pino = require('pino').default;
 const fs = require('node:fs');
@@ -32,42 +31,104 @@ let argv = yargs(hideBin(process.argv)).usage('Reconstruct graph for a given lib
 
 
 (function() {
-    const revert = addHook((code, _filename) => {
-        return wrapCode(code)
-    }, {exts: ['.js'], ignoreNodeModules: false})
-    
-    let lib = require(argv.library)
-    revert()
+    let jsonContent = fs.readFileSync(argv['graph-path'], {encoding: 'utf-8'});
+    let nodeList = JSON.parse(jsonContent);
+    let workList = new Set();
 
-    let jsonContent = fs.readFileSync(argv['graph-path'], {encoding: 'utf-8'})
-    let nodeList = JSON.parse(jsonContent)
-    let startNode = nodeList[0]
-    let workList = [[startNode, lib]]
-    let visitedNode = new Set();
-    
-    while (workList.length > 0) {
-        let [node, obj] = workList.shift();
-
-        for (let i = 0; i < node.edges.length; i++) {
-            let edge = node.edges[i];
-            if (edge.type === 'ownProp') {
-                if (!obj[edge.name]) {
-                    console.error(`The edge ${i} of Node ${node.id} does not exist.`);
+    function evalEdgeData(data) {
+        return new Function('__nodelist__', `return ${data}`)(new Proxy({}, {
+            get: function(target, p, receiver) {
+                if (!Object.hasOwn(nodeList[p], 'obj')) {
+                    nodeList[p].obj = reconstruct(p);
                 }
-
-                workList.push([graph[edge.target.nodeId], obj[edge.name]]);
+                return nodeList[p];
             }
-            else if (edge.type === 'call') {
-                let inputData = evalObject(edge.data);
-                let result = obj.apply(
-                    new Function(`return ${inputData.this}`)(), 
-                    new Function(`return ${inputData.arguments}`)()
-                );
+        }));
+    }
 
-                if (edge.target.nodeId) {
-                    nodeList[edge.target.nodeId]
+    function compareTypes(obj, typeNodeId) {
+        let node = nodeList[typeNodeId];
+        if (node.nodeType === 'type') {
+            for (let e of node.edges) {
+                if (e.edgeType === 'hasProp') {
+                    compareTypes(obj[e.propName], e.target.nodeId);
                 }
+            }
+        } else {
+            if (!Object.hasOwn(node, 'obj')) {
+                node.obj = obj;
             }
         }
     }
+
+    for (let n of nodeList) {
+        if (n.nodeType === 'start') {
+            const revert = addHook((code, _filename) => {
+                return wrapCode(code);
+            }, {exts: ['.js'], ignoreNodeModules: false});
+        
+            n.obj = require(argv.library);
+            revert();
+            workList.push(n.nodeId);
+        }
+    }
+
+    function reconstruct(nodeId, edgeId) {
+        if (nodeList[nodeId].visited) {
+            return;
+        }
+
+        if (!Object.hasOwn(nodeList[nodeId], 'obj')) {
+            reconstruct(nodeList[nodeId].createdFrom.nodeId);
+        }
+
+        for (let edge of nodeList[nodeId].edges) {
+            if (edge.type === 'ownProp') {
+                if (!nodeList[nodeId].obj[edge.name]) {
+                    console.warn(`The edge ${i} of Node ${nodeId} does not exist.`);
+                }
+                if (!Object.hasOwn(nodeList[edge.target.nodeId], 'obj')) {
+                    nodeList[edge.target.nodeId].obj = node.obj[edge.name];
+                    workList.push(nodeList[edge.target.nodeId]);
+                }
+                else {
+                    if (nodeList[nodeId].obj[edge.name] !== nodeList[edge.target.nodeId].obj) {
+                        console.warn(`The edge ${i} of Node ${nodeId} does not point to the original object.`);
+                    }
+                }
+            }
+
+            else if (edge.type === 'call') {
+                let inputData = evalEdgeData(edge.data);
+                if (typeof nodeList[nodeId].obj !== 'function') {
+                    console.warn(`The node ${nodeId} is not a function.`);
+                } else {
+                    try {
+                        let result = nodeList[nodeId].obj.apply(
+                            new Function(`return ${inputData.this}`)(), 
+                            new Function(`return ${inputData.arguments}`)()
+                        );
+
+                        if (edge.target.nodeId) {
+                            compareTypes(result, nodeList[edge.target.nodeId]);
+                        }
+                    } catch (e) {
+                        console.warn(`Error in executing the function represented by Node ${nodeId} with input data ${inputData}.`)
+                    }
+                    
+                }
+                
+            }
+        }
+        nodeList[nodeId].visited = true;
+    }
+
+    while (workList.length > 0) {
+        let nodeId = workList.values().next().value;
+        workList.delete(nodeId);
+        if (!nodeList[nodeId].visited) {
+            reconstruct(nodeId);
+        }
+    }
+    
 })()

@@ -8,7 +8,7 @@ run the command `npm install` to install the dependencies.
 
 - Generate object relation graph for a library
 
-run the command
+Run the command
 
 ```
 node construct-graph.js --library <library path> [--output <model path>] [--max-iteration <number>] [--max-execution-time <number>] [--max-argument-count <number>]
@@ -16,7 +16,10 @@ node construct-graph.js --library <library path> [--output <model path>] [--max-
 
 The library path should be a commonJS module (packaged UMD modules are also OK) or a single JavaScript file.
 
+
 - Reconstruct object relation graph for a library
+
+Run the command
 
 ```
 node reconstruct-graph.js --library <library path> --graph <graph path>
