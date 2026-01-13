@@ -12,7 +12,7 @@ export default function(code: string, filename?: string) {
 
     babelTraverse(ast, {
         exit(path) {
-            if (path.isNewExpression() || path.isObjectExpression()) {
+            if (path.isNewExpression() || path.isObjectExpression() || path.isFunctionExpression()) {
                 path.replaceWith(callExpression(
                     parseExpression('Object.defineProperty') as any,
                     [path.node, stringLiteral('__globalid__'), parseExpression('{value: getGlobalId(), enumerable: false}')]

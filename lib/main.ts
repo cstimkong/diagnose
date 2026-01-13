@@ -15,6 +15,35 @@ const argv: any = yargs(hideBin(process.argv))
 .demandOption(['library-path'])
 .parse();
 
-let nodeMap = {};
+(function() {
+    let nodes: any = {};
+    let edges: any = {};
+
+    function findNewObjects(obj: any) {
+
+        if (typeof obj === 'object' && obj !== null && Object.getPrototypeOf(obj) !== Object.prototype) {
+            let proto = Object.getPrototypeOf(obj);
+            if (proto !== null && proto.__globalid__) {
+                if (!nodes[proto.__globalid__]){
+                    nodes[proto.__globalid__] = {id: proto.__globalid__, objRef: proto};
+                }
+            }
+        }
+        
+        for (let x of Object.getOwnPropertyNames(obj)) {
+            if ((typeof obj[x] === 'function' || typeof obj[x] === 'object') && obj[x] !== null && obj[x].__globalid__) {
+                if (!nodes[obj[x].__globalid__]) {
+                    nodes[obj[x].__globalid__] = {id: obj[x].__globalid__, objRef: obj[x], visited: false};
+                    if (!edges[obj.__globalid__]) {
+                        edges[obj.__globalid__] = {ownProps: {}, calls: {}, hasProps: {}};
+                    }
+                    edges[obj.__globalid__].ownProps[x] = obj[x].__globalid__;
+                }
+            }
+        }
+    }
+
+})()
+
 
 const mod = loadmodule(argv.libraryPath as string, instrument);
