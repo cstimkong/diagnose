@@ -1,4 +1,6 @@
 **/package-lock.json
 **/node_modules/
+dist/*
 
+# macOS DS_Store file
 **/.DS_Store

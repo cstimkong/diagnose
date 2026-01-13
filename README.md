@@ -1,9 +1,8 @@
 
-## *(Working in Progress)* The Monorepo of Diagnose and Other Breaking Change Detection Tools
+## *(Working in Progress)* Diagnose: Detecting Breaking Changes for JavaScript Packages
 
-This repository contains the implementations of JavaScript breaking change detection tools `Diagnose` and `NoRegrets+`, as well as the type differencing tool based on `Tsinfer-node`.
+This repository contains the implementations of JavaScript breaking change detection tools `Diagnose`.
 
-We also present the annotated breaking changes and detection results or different approaches in `supplementary` directory.
 
 ### Usage
 
