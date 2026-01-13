@@ -2,13 +2,21 @@
   "name": "diagnose",
   "version": "1.0.0",
   "author": "Dezhen Kong",
-  "type": "module",
   "dependencies": {
+    "@babel/generator": "^7.28.6",
+    "@babel/parser": "^7.28.6",
+    "@babel/traverse": "^7.28.6",
+    "@babel/types": "^7.28.6",
+    "pirates": "^4.0.7",
     "typescript": "^5.9.3"
   },
   "devDependencies": {
+    "@types/babel__generator": "^7.27.0",
+    "@types/babel__parser": "^7.0.0",
+    "@types/babel__traverse": "^7.28.0",
     "@types/node": "^25.0.8",
     "@types/yargs": "^17.0.35",
+    "mocha": "^11.7.5",
     "yargs": "^18.0.0"
   }
 }
