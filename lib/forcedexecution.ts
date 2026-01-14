@@ -37,12 +37,12 @@ function randomChoose<T>(funcs: {(): T}[]) {
     return funcs[idx]!();
 }
 
-function getProxy() {
+function getProxy(): any {
     let state = 'any';
     let internalValue: any = undefined;
-
-    return new Proxy({}, {
-        get(target: any, p) {
+    let target: any = {};
+    return new Proxy(function() {}, {
+        get(_, p) {
             if (p === '__value__') {
                 if (internalValue !== undefined) {
                     return internalValue;
@@ -142,13 +142,19 @@ function getProxy() {
             
         },
 
-        set(target, p, newValue) {
+        set(_, p, newValue) {
             if (state === 'string' || state === 'number') {
                 throw new Error('Should not set a property for a primitive value');
             }
             state = 'object';
             target[p] = newValue;
             return true;
+        },
+
+        apply(_, thisArg, argArray) {
+            if (state === 'any') {
+                state = 'function';
+            }
         }
     })
 }
