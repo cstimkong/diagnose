@@ -2,33 +2,43 @@
  * 
  * Forced Execution
  */
-import {randomString, randomNumber, randomChoose} from './random.js';
+import { randomString, randomNumber, randomChoose, randomSample } from './random.js';
 
 function getProxy(): any {
     let state = 'any';
     let internalValue: any = undefined;
     let target: any = {};
+    let retValues: any[] = [];
     return new Proxy(function() {}, {
         get(_, p) {
             if (p === '__value__') {
-                if (internalValue !== undefined) {
-                    return internalValue;
+                if (typeof internalValue === 'number') {
+                    return `${internalValue}`;
+                }
+                if (typeof internalValue === 'string') {
+                    return `"${internalValue}"`;
                 }
                 if (state === 'string') {
-                    return Symbol.for('AnyString');
+                    return 'Symbol.for(\"AnyString\")';
                 }
                 if (state === 'number') {
-                    return Symbol.for('AnyNumber');
+                    return 'Symbol.for(\"AnyNumber\")';
                 }
                 if (state === 'any') {
-                    return Symbol.for('Any');
+                    return 'Symbol.for(\"Any\")';
                 }
+
                 if (state === 'object') {
-                    let result = {};
+                    let result = '{';
                     for (let p of Object.getOwnPropertyNames(target)) {
-                        (result as any)[p] = target[p].__value__;
+                        result += `"${p.replace('"', '\\"')}": ${target[p].__value__}, `;
                     }
+                    result += '}';
                     return result;
+                }
+                if (state === 'function') {
+                    let retv = randomSample(retValues).__value__;
+                    return `function() { return ${retv} }`;
                 }
             }
             if (Object.hasOwn(target, p)) {
@@ -121,6 +131,11 @@ function getProxy(): any {
         apply(_, thisArg, argArray) {
             if (state === 'any') {
                 state = 'function';
+                let retValue = getProxy();
+                retValues.push(retValue);
+                return retValue;
+            } else {
+                throw new Error('Cannot be called');
             }
         }
     })

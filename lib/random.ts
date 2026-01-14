@@ -32,3 +32,8 @@ export function randomChoose(funcs: Function[]): any {
     let idx = Math.floor(Math.random() * funcs.length);
     return funcs[idx]!();
 }
+
+export function randomSample(elements: any[]) {
+    let idx = Math.floor(Math.random() * elements.length);
+    return elements[idx];
+}

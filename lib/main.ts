@@ -32,7 +32,7 @@ import { randomChoose, randomNumber, randomString } from './random.js';
         if (!edges[obj.__globalid__]) {
             edges[obj.__globalid__] = { ownProps: {}, calls: {}, hasProps: {} };
         }
-        
+
         if (typeof obj === 'object' && obj !== null && Object.getPrototypeOf(obj) !== Object.prototype) {
             let proto = Object.getPrototypeOf(obj);
             if (proto !== null && proto.__globalid__) {
