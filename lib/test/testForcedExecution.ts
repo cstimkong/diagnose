@@ -1,9 +1,9 @@
 import forcedExecution from '../forcedexecution.js'
 
-for (let i = 0; i < 100; i++) {
+for (let i = 0; i < 1000; i++) {
     try {
         let [args, result] = forcedExecution(function(a: any, b: any, callback: (x: any, y: any) => any) {
-            ((x) => {})(a.name);
+            ((x) => {})(a.charAt(0) === 'b');
             if (b.value < 100) {
                 ((x) => {})(a.hello);
             }

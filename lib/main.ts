@@ -9,7 +9,11 @@ import process from 'process';
 import loadmodule from './loadmodule.js';
 import instrument from './instrument.js';
 import forcedExecution from './forcedexecution.js';
+import { parseExpression } from '@babel/parser';
+import babelTraverse from '@babel/traverse';
 import { randomChoose, randomNumber, randomString } from './random.js';
+import { numericLiteral, objectExpression, stringLiteral } from '@babel/types';
+import generate from '@babel/generator';
 
 (async function () {
     const argv: any = yargs(hideBin(process.argv))
@@ -54,30 +58,28 @@ import { randomChoose, randomNumber, randomString } from './random.js';
         }
     }
 
-    function fillInPlaceholders(value: any) {
-        if (typeof value === 'string' || typeof value === 'number') {
-            return value;
-        }
-        if (value === Symbol.for('Any')) {
-            return randomChoose([
-                function() { return randomString() },
-                function() { return randomNumber() },
-                function() { return {} }
-            ]);
-        }
-
-        if (value === Symbol.for('AnyString')) {
-            return randomString();
-        }
-        if (value === Symbol.for('AnyNumber')) {
-            return randomNumber();
-        }
-
-        if (typeof value === 'object' && value !== null) {
-            for (let x of Object.keys(value)) {
-                value[x] = fillInPlaceholders(value[x]);
+    function replacePlaceholders(valueRep: string): string {
+        let ast = parseExpression(valueRep);
+        babelTraverse(ast, {
+            exit(path) {
+                if (path.isCallExpression()) {
+                    if (valueRep.slice(path.node.start!, path.node.end!) === 'Symbol.for("Any")') {
+                        randomChoose([
+                            function() { path.replaceWith(stringLiteral(randomString())); },
+                            function() { path.replaceWith(numericLiteral(randomNumber())); },
+                            function() { path.replaceWith(objectExpression([])); }
+                        ])
+                    }
+                    if (valueRep.slice(path.node.start!, path.node.end!) === 'Symbol.for("AnyString")') {
+                        path.replaceWith(stringLiteral(randomString()));
+                    }
+                    if (valueRep.slice(path.node.start!, path.node.end!) === 'Symbol.for("AnyNumber")') {
+                        path.replaceWith(numericLiteral(randomNumber()));
+                    }
+                }
             }
-        }
+        });
+        return generate(ast).code;
     }
 
     async function createCallEdges(func: Function) {
@@ -87,6 +89,7 @@ import { randomChoose, randomNumber, randomString } from './random.js';
                 if (result instanceof Promise) {
                     result = await result;
                 }
+                
             } catch (e) {
                 // ignore
             }
