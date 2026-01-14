@@ -20,6 +20,9 @@ const argv: any = yargs(hideBin(process.argv))
     let edges: any = {};
 
     function findNewObjects(obj: any) {
+        if (nodes[obj.__globalid__]) {
+            return;
+        }
 
         if (typeof obj === 'object' && obj !== null && Object.getPrototypeOf(obj) !== Object.prototype) {
             let proto = Object.getPrototypeOf(obj);
@@ -28,8 +31,9 @@ const argv: any = yargs(hideBin(process.argv))
                     nodes[proto.__globalid__] = {id: proto.__globalid__, objRef: proto};
                 }
             }
+            findNewObjects(proto);
         }
-        
+
         for (let x of Object.getOwnPropertyNames(obj)) {
             if ((typeof obj[x] === 'function' || typeof obj[x] === 'object') && obj[x] !== null && obj[x].__globalid__) {
                 if (!nodes[obj[x].__globalid__]) {
@@ -39,8 +43,13 @@ const argv: any = yargs(hideBin(process.argv))
                     }
                     edges[obj.__globalid__].ownProps[x] = obj[x].__globalid__;
                 }
+                findNewObjects(obj[x]);
             }
         }
+    }
+
+    function createCallEdges(func: Function) {
+        // TODO
     }
 
 })()
