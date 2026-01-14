@@ -29,7 +29,10 @@ import { randomChoose, randomNumber, randomString } from './random.js';
         if (nodes[obj.__globalid__]) {
             return;
         }
-
+        if (!edges[obj.__globalid__]) {
+            edges[obj.__globalid__] = { ownProps: {}, calls: {}, hasProps: {} };
+        }
+        
         if (typeof obj === 'object' && obj !== null && Object.getPrototypeOf(obj) !== Object.prototype) {
             let proto = Object.getPrototypeOf(obj);
             if (proto !== null && proto.__globalid__) {
@@ -44,9 +47,6 @@ import { randomChoose, randomNumber, randomString } from './random.js';
             if ((typeof obj[x] === 'function' || typeof obj[x] === 'object') && obj[x] !== null && obj[x].__globalid__) {
                 if (!nodes[obj[x].__globalid__]) {
                     nodes[obj[x].__globalid__] = { id: obj[x].__globalid__, objRef: obj[x], visited: false };
-                    if (!edges[obj.__globalid__]) {
-                        edges[obj.__globalid__] = { ownProps: {}, calls: {}, hasProps: {} };
-                    }
                     edges[obj.__globalid__].ownProps[x] = obj[x].__globalid__;
                 }
                 findNewObjects(obj[x]);
@@ -72,7 +72,7 @@ import { randomChoose, randomNumber, randomString } from './random.js';
         if (value === Symbol.for('AnyNumber')) {
             return randomNumber();
         }
-        
+
         if (typeof value === 'object' && value !== null) {
             for (let x of Object.keys(value)) {
                 value[x] = fillInPlaceholders(value[x]);

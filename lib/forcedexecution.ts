@@ -126,12 +126,12 @@ function getProxy(): any {
     })
 }
 
-export default function(func: Function, argNum: number) {
+export default function(func: Function, argNum: number, thisArg?: any): [any[], any] {
     let args = [];
     for (let i = 0; i < argNum; i++) {
         args.push(getProxy());
     }
-    let result = func.apply(undefined, args);
+    let result = func.apply(thisArg, args);
     let argReps = [];
     for (let i = 0; i < args.length; i++) {
         argReps.push(args[i].__value__);
