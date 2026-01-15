@@ -2,6 +2,13 @@ import babelTraverse from '@babel/traverse';
 import { parse, parseExpression, type ParseResult } from '@babel/parser';
 import { objectExpression, objectProperty, callExpression, identifier, stringLiteral } from '@babel/types';
 import { generate } from '@babel/generator'
+/**
+ * Instrument the code for forced execution.
+ * 
+ * @param code The code to instrument
+ * @param filename optional filename
+ * @returns The instrumented code
+ */
 export default function(code: string, filename?: string) {
     let ast: ParseResult;
     if (filename) {

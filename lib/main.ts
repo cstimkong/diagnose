@@ -20,6 +20,7 @@ import generate from '@babel/generator';
         .usage('Generate object relation graph for a JavaScript package')
         .option('library-path', { alias: 'l', type: 'string' })
         .option('max-execution-time', { type: 'number', default: 100 })
+        .option('max-iteration', {type: 'number', default: 100})
         .option('max-arg-number', { type: 'number', default: 5 })
         .demandOption(['library-path'])
         .parse();
@@ -29,9 +30,10 @@ import generate from '@babel/generator';
     let edges: any = {};
 
 
-    function findNewObjects(obj: any) {
+    function findNewObjects(obj: any): any[] {
+        let result: any[] = [];
         if (nodes[obj.__globalid__]) {
-            return;
+            return [];
         }
         if (!edges[obj.__globalid__]) {
             edges[obj.__globalid__] = { ownProps: {}, calls: [], hasProps: {} };
@@ -44,7 +46,7 @@ import generate from '@babel/generator';
                     nodes[proto.__globalid__] = { id: proto.__globalid__, objRef: proto };
                 }
             }
-            findNewObjects(proto);
+            result = result.concat(findNewObjects(proto));
         }
 
         for (let x of Object.getOwnPropertyNames(obj)) {
@@ -53,11 +55,19 @@ import generate from '@babel/generator';
                     nodes[obj[x].__globalid__] = { id: obj[x].__globalid__, objRef: obj[x], visited: false };
                     edges[obj.__globalid__].ownProps[x] = obj[x].__globalid__;
                 }
-                findNewObjects(obj[x]);
+                result = result.concat(findNewObjects(obj[x]));
             }
         }
+
+        return result;
     }
 
+    /**
+     * Replace the Any symbols in the value representation.
+     * 
+     * @param valueRep 
+     * @returns the replaced code for the value representation
+     */
     function replacePlaceholders(valueRep: string): string {
         let ast = parseExpression(valueRep);
         babelTraverse(ast, {
@@ -82,6 +92,11 @@ import generate from '@babel/generator';
         return generate(ast).code;
     }
 
+    /**
+     * Get the type representation of a value.
+     * @param value any value of JavaScript
+     * @returns the type representation
+     */
     function getType(value: any) {
         if (value === Symbol.for('Any')) {
             return 'any';
@@ -119,6 +134,18 @@ import generate from '@babel/generator';
         }
         for (let x of calldata) {
             // TODO
+        }
+    }
+
+    let queue: any[] = [];
+    // main loop
+    while (queue.length > 0) {
+        let o = queue.shift();
+        let newObjects = findNewObjects(o);
+        for (let x of newObjects) {
+            if (typeof x === 'function') {
+                createCallEdges(x);
+            }
         }
     }
 })()
