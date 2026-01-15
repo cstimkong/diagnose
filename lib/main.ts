@@ -34,7 +34,7 @@ import generate from '@babel/generator';
             return;
         }
         if (!edges[obj.__globalid__]) {
-            edges[obj.__globalid__] = { ownProps: {}, calls: {}, hasProps: {} };
+            edges[obj.__globalid__] = { ownProps: {}, calls: [], hasProps: {} };
         }
 
         if (typeof obj === 'object' && obj !== null && Object.getPrototypeOf(obj) !== Object.prototype) {
@@ -82,17 +82,43 @@ import generate from '@babel/generator';
         return generate(ast).code;
     }
 
+    function getType(value: any) {
+        if (value === Symbol.for('Any')) {
+            return 'any';
+        }
+        if (typeof value === 'string' || value === Symbol.for('AnyString')) {
+            return 'string';
+        }
+        else if (typeof value === 'number' || value === Symbol.for('AnyNumber')) {
+            return 'number';
+        }
+        else if (typeof value === 'object') {
+            let result = {};
+            for (let x of Object.getOwnPropertyNames(value)) {
+                Object.defineProperty(result, x, {value: value[x]});
+            }
+        }
+    }
+
     async function createCallEdges(func: Function) {
+        let calldata = [];
         for (let i = 0; i < argv.maxExecutionTime; i++) {
             try {
                 let [args, result] = forcedExecution(func, argv.maxArgNumber);
                 if (result instanceof Promise) {
                     result = await result;
                 }
-                
+                let input = [];
+                for (let i = 0; i < args.length; i++) {
+                    input.push(replacePlaceholders(args[i]));
+                }
+                calldata.push(input);
             } catch (e) {
                 // ignore
             }
+        }
+        for (let x of calldata) {
+            // TODO
         }
     }
 })()
