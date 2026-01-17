@@ -61,6 +61,10 @@ import generate from '@babel/generator';
 
         return result;
     }
+    
+    function constructValue(valueRep: string): any {
+        return new Function(`return ${valueRep}`)();
+    }
 
     /**
      * Replace the Any symbols in the value representation.
@@ -107,34 +111,59 @@ import generate from '@babel/generator';
         else if (typeof value === 'number' || value === Symbol.for('AnyNumber')) {
             return 'number';
         }
+        if (value === undefined) {
+            return 'undefined';
+        }
+        if (value === null) {
+            return 'null';
+        }
+
         else if (typeof value === 'object') {
-            let result = {};
+            let result: any = {};
             for (let x of Object.getOwnPropertyNames(value)) {
                 Object.defineProperty(result, x, {value: value[x]});
             }
+            result['[[prototype]]'] = getType(Object.getPrototypeOf(value));
+            
+            if (value.__globalid__) {
+                result.__globalid__ = value.__globalid__;
+            }
+            return result;
         }
+
+        throw new Error('Unsupported value.');
     }
 
     async function createCallEdges(func: Function) {
         let calldata = [];
         for (let i = 0; i < argv.maxExecutionTime; i++) {
             try {
-                let [args, result] = forcedExecution(func, argv.maxArgNumber);
+                let [thisArg, args, result] = forcedExecution(func, argv.maxArgNumber);
                 if (result instanceof Promise) {
                     result = await result;
                 }
                 let input = [];
                 for (let i = 0; i < args.length; i++) {
-                    input.push(replacePlaceholders(args[i]));
+                    input.push(constructValue(replacePlaceholders(args[i])));
                 }
-                calldata.push(input);
+
+                calldata.push([constructValue(replacePlaceholders(thisArg)), input]);
             } catch (e) {
                 // ignore
             }
         }
-        for (let x of calldata) {
-            // TODO
+        let calldataReturns = [];
+        for (let cd of calldata) {
+            for (let e of cd) {
+                let thisArg = cd[0];
+                let result = func.apply(thisArg, cd[1]);
+                if (result instanceof Promise) {
+                    result = await result;
+                }
+                calldataReturns.push(getType(result));
+            }
         }
+        
     }
 
     let queue: any[] = [];

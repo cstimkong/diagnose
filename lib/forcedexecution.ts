@@ -141,15 +141,43 @@ function getProxy(): any {
     })
 }
 
-export default function(func: Function, argNum: number, thisArg?: any): [any[], any] {
+function getValueRepresentation(value: any) {
+    if (value === undefined) {
+        return 'undefined';
+    }
+    else if (value === null) {
+        return 'null';
+    }
+    else if (typeof value === 'string') {
+        return `"${value}"`;
+    }
+    else if (typeof value === 'number') {
+        return `${value}`;
+    }
+    else if (typeof value === 'object') {
+        return value.__value__;
+    }
+    throw new Error('Cannot get representation.');
+}
+
+/**
+ * Forcefully execute a function.
+ * 
+ * @param func The function to forcefully execute
+ * @param argNum the number of the argument
+ * @param thisArg whether to set a proxy object for thisArg
+ * @returns the representation of thisArg, arguments and the concrete value of the result
+ */
+export default function(func: Function, argNum: number, thisArg?: boolean): [any, any[], any] {
     let args = [];
     for (let i = 0; i < argNum; i++) {
         args.push(getProxy());
     }
-    let result = func.apply(thisArg, args);
+    let thisArgValue = thisArg ? getProxy() : undefined;
+    let result = func.apply(thisArgValue, args);
     let argReps = [];
     for (let i = 0; i < args.length; i++) {
-        argReps.push(args[i].__value__);
+        argReps.push(getValueRepresentation(args[i]));
     }
-    return [argReps, result];
+    return [getValueRepresentation(thisArg), argReps, result];
 }
