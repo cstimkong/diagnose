@@ -124,7 +124,7 @@ import generate from '@babel/generator';
                 Object.defineProperty(result, x, {value: value[x]});
             }
             result['[[prototype]]'] = getType(Object.getPrototypeOf(value));
-            
+
             if (value.__globalid__) {
                 result.__globalid__ = value.__globalid__;
             }
@@ -138,7 +138,7 @@ import generate from '@babel/generator';
         let calldata = [];
         for (let i = 0; i < argv.maxExecutionTime; i++) {
             try {
-                let [thisArg, args, result] = forcedExecution(func, argv.maxArgNumber);
+                let [thisArg, args, result] = await forcedExecution(func, argv.maxArgNumber);
                 if (result instanceof Promise) {
                     result = await result;
                 }
