@@ -1,13 +1,19 @@
 {
   "name": "diagnose",
+  "description": "JavaScript package breaking change detection",
   "version": "1.0.0",
   "author": "Dezhen Kong",
+  "repository": {
+    "url": "https://github.com/cstimkong/diagnose",
+    "type": "github"
+  },
   "dependencies": {
     "@babel/generator": "^7.28.6",
     "@babel/parser": "^7.28.6",
     "@babel/template": "^7.28.6",
     "@babel/traverse": "^7.28.6",
     "@babel/types": "^7.28.6",
+    "object-hash": "^3.0.0",
     "pirates": "^4.0.7",
     "typescript": "^5.9.3",
     "yargs": "^18.0.0"

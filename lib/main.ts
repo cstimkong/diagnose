@@ -93,15 +93,16 @@ import internalObjects from './internalobjects.js';
         }
 
         else if (typeof value === 'object') {
+            // For the objects initialized in the loading phase
+            if (value.__globalid__) {
+                return {'__globalid__': value.__globalid__};
+            }
+
             let result: any = {};
             for (let x of Object.getOwnPropertyNames(value)) {
                 Object.defineProperty(result, x, {value: value[x]});
             }
             result['[[prototype]]'] = getType(Object.getPrototypeOf(value));
-
-            if (value.__globalid__) {
-                result.__globalid__ = value.__globalid__;
-            }
             return result;
         }
 
@@ -131,9 +132,6 @@ import internalObjects from './internalobjects.js';
             for (let e of cd) {
                 let thisArg = cd[0];
                 let result = func.apply(thisArg, cd[1]);
-                if (result instanceof Promise) {
-                    result = await result;
-                }
                 calldataReturns.push(getType(result));
             }
         }
