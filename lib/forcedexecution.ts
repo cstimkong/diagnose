@@ -47,6 +47,28 @@ function getProxy(): any {
                     return `function() { return ${retv} }`;
                 }
             }
+            if (p === '__typeof__') {
+                if (state === 'string') {
+                    return 'string';
+                }
+                if (state === 'number') {
+                    return 'number';
+                }
+                if (state === 'true' || state === 'false') {
+                    return 'boolean';
+                }
+                if (state === 'object') {
+                    return 'object';
+                }
+                if (state === 'any') {
+                    return randomChoose([
+                        function() { state = 'string'; return 'string'; },
+                        function() { state = 'number'; return 'number'; },
+                        function() { state = 'object'; return 'object'; },
+                        function() { state = 'function'; return 'function'; }
+                    ]);
+                }
+            }
             if (Object.hasOwn(target, p)) {
                 return target[p];
             }
@@ -141,7 +163,7 @@ function getProxy(): any {
         },
 
         apply(_, thisArg, argArray) {
-            if (state === 'any') {
+            if (state === 'any' || state === 'function') {
                 state = 'function';
                 let retValue = getProxy();
                 retValues.push(retValue);

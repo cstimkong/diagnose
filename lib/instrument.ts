@@ -24,8 +24,8 @@ export default function(code: string, filename?: string) {
             // Set global ID for object allocation sites
             if (path.isNewExpression() || path.isObjectExpression() || path.isFunctionExpression()) {
                 path.replaceWith(callExpression(
-                    parseExpression('Object.defineProperty') as any,
-                    [path.node, stringLiteral('__globalid__'), parseExpression('{value: getGlobalId(), enumerable: false}')]
+                    identifier('__defineproperty__'),
+                    [path.node, stringLiteral('__globalid__'), parseExpression('__getGlobalId__()')]
                 ))
             }
             // Set global ID for the objects created via `Object.create` calls
@@ -33,11 +33,55 @@ export default function(code: string, filename?: string) {
                 if (path.node.callee.object.type === 'Identifier' && path.node.callee.object.name === 'Object'
                     && path.node.callee.property.type === 'Identifier' && path.node.callee.property.name === 'create') {
                     path.replaceWith(callExpression(
-                        parseExpression('Object.defineProperty') as any,
-                        [path.node, stringLiteral('__globalid__'), parseExpression('{value: getGlobalId(), enumerable: false}')]
+                        identifier('__defineproperty__'),
+                        [path.node, stringLiteral('__globalid__'), parseExpression('__getGlobalId__()')]
                     ))
                 }
             }
+            // Patch Object.keys
+            if (path.isCallExpression() && path.node.callee.type === 'MemberExpression') {
+                if (path.node.callee.object.type === 'Identifier' && path.node.callee.object.name === 'Object'
+                    && path.node.callee.property.type === 'Identifier' && path.node.callee.property.name === 'keys') {
+                    path.replaceWith(callExpression(
+                        identifier('__objectkeys__'),
+                        path.node.arguments
+                    ))
+                }
+            }
+
+            // Patch Object.getOwnPropertyNames
+            if (path.isCallExpression() && path.node.callee.type === 'MemberExpression') {
+                if (path.node.callee.object.type === 'Identifier' && path.node.callee.object.name === 'Object'
+                    && path.node.callee.property.type === 'Identifier' && path.node.callee.property.name === 'getOwnPropertyNames') {
+                    path.replaceWith(callExpression(
+                        identifier('__getownpropertynames__'),
+                        path.node.arguments
+                    ))
+                }
+            }
+
+            // Patch Object.getOwnPropertyDescriptors
+            if (path.isCallExpression() && path.node.callee.type === 'MemberExpression') {
+                if (path.node.callee.object.type === 'Identifier' && path.node.callee.object.name === 'Object'
+                    && path.node.callee.property.type === 'Identifier' && path.node.callee.property.name === 'getOwnPropertyDescriptors') {
+                    path.replaceWith(callExpression(
+                        identifier('__getownpropertydescriptors__'),
+                        path.node.arguments
+                    ))
+                }
+            }
+
+            // Patch Reflect.ownKeys
+            if (path.isCallExpression() && path.node.callee.type === 'MemberExpression') {
+                if (path.node.callee.object.type === 'Identifier' && path.node.callee.object.name === 'Reflect'
+                    && path.node.callee.property.type === 'Identifier' && path.node.callee.property.name === 'ownKeys') {
+                    path.replaceWith(callExpression(
+                        identifier('__reflectownkeys__'),
+                        path.node.arguments
+                    ))
+                }
+            }
+
             // Patch typeof operator
             if (path.isUnaryExpression() && path.node.operator === 'typeof') {
                 if (path.node.argument.type === 'Identifier') {

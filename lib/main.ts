@@ -30,6 +30,7 @@ import objectHash from 'object-hash';
     //  object -> a global ID
     //  type -> a hash string starting with `typehash:`
     //  special type: a string, 'string', 'number', etc.
+    //  Node specification: {id: <some ID>, objRef: <object reference>, entry: <boolean>}
     let nodes: any = {string: {}, number: {}, true: {}, false: {}};
     let edges: any = {};
 
@@ -174,7 +175,7 @@ import objectHash from 'object-hash';
             }
         }
         let calldataReturns = [];
-        let returnTypeMap: NodeJS.Dict<any> = {}
+        let returnTypeMap: NodeJS.Dict<any> = {};
         for (let cd of calldata) {
             let thisArg = cd[0];
             let result = func.apply(thisArg, cd[1]);
@@ -193,8 +194,10 @@ import objectHash from 'object-hash';
     }
 
     let queue: any[] = [];
+    let iterationCount = 0;
+    
     // main loop
-    while (queue.length > 0) {
+    while (queue.length > 0 && iterationCount < argv.maxIteration) {
         let o = queue.shift();
         let newObjects = findNewObjects(o);
         for (let x of newObjects) {
@@ -202,5 +205,6 @@ import objectHash from 'object-hash';
                 createCallEdges(x);
             }
         }
+        iterationCount += 1;
     }
 })()

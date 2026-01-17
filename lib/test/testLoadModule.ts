@@ -1,14 +1,18 @@
 import loadmodule from '../loadmodule.js';
 import {resolve, join} from 'path';
 import instrument from '../instrument.js';
+import { __getGlobalId__, __typeofimpl__, __defineproperty__, 
+    __getownpropertynames__, __objectkeys__, 
+    __reflectownkeys__, __getownpropertydescriptors__ } from '../patch.js';
+(globalThis as any).__getGlobalId__ = __getGlobalId__;
+(globalThis as any).__typeof__ = __typeofimpl__;
+(globalThis as any).__defineproperty__ = __defineproperty__;
+(globalThis as any).__getownpropertynames__ = __getownpropertynames__;
+(globalThis as any).__objectkeys__ = __objectkeys__;
+(globalThis as any).__reflectownkeys__ = __reflectownkeys__;
+(globalThis as any).__getownpropertydescriptors__ = __getownpropertydescriptors__;
 
-(globalThis as any).getGlobalId = (function() {
-    let i = 0;
-    return function() {
-        return i++;
-    }
-})();
-
-const mod: any = loadmodule(join(__dirname, '../../example_packages/qs.js'), instrument);
+const mod: any = loadmodule(join(__dirname, '../../example_packages/joi.js'), instrument);
 console.log(mod);
-console.log(mod.__globalid__, mod.formats.__globalid__);
+console.log(mod.__globalid__);
+console.log(mod.string.__globalid__);

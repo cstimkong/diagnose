@@ -27,11 +27,16 @@ export function randomNumber(): number {
         },
     ])
 }
-
+/**
+ * Randomly choose a function to execute. The function should have no argument.
+ * @param funcs Funtion list
+ * @returns any value returned by the chosen function
+ */
 export function randomChoose(funcs: Function[]): any {
     let idx = Math.floor(Math.random() * funcs.length);
     return funcs[idx]!();
 }
+
 
 export function randomSample(elements: any[]) {
     let idx = Math.floor(Math.random() * elements.length);
