@@ -24,6 +24,12 @@ function getProxy(): any {
                 if (state === 'number') {
                     return 'Symbol.for(\"AnyNumber\")';
                 }
+                if (state === 'true') {
+                    return true;
+                }
+                if (state === 'false') {
+                    return false;
+                }
                 if (state === 'any') {
                     return 'Symbol.for(\"Any\")';
                 }
@@ -54,6 +60,12 @@ function getProxy(): any {
                     }
                     if (state === 'number') {
                         internalValue = randomNumber();
+                    }
+                    if (state === 'true') {
+                        return hint === 'string' ? 'true' : 1;
+                    }
+                    if (state === 'false') {
+                        return hint === 'string' ? 'true' : 1;
                     }
                     if (state === 'object') {
                         throw new Error('Should not coerce an object to a string');
@@ -151,13 +163,13 @@ function getValueRepresentation(value: any) {
     else if (typeof value === 'string') {
         return `"${value}"`;
     }
-    else if (typeof value === 'number') {
+    else if (typeof value === 'number' || typeof value === 'boolean') {
         return `${value}`;
     }
-    else if (typeof value === 'object') {
+    else if (typeof value === 'object' || typeof value === 'function') {
         return value.__value__;
     }
-    throw new Error('Cannot get representation.');
+    throw new Error('Cannot get representation.' + typeof value);
 }
 
 /**
