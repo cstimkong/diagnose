@@ -11,6 +11,7 @@ import instrument from './instrument.js';
 import forcedExecution from './forcedexecution.js';
 import { replacePlaceholders } from './value.js';
 import internalObjects from './internalobjects.js';
+import objectHash from 'object-hash';
 
 (async function () {
     const argv: any = yargs(hideBin(process.argv))
@@ -23,7 +24,9 @@ import internalObjects from './internalobjects.js';
         .parse();
 
     const mod = loadmodule(argv.libraryPath as string, instrument);
-    let nodes: any = {};
+
+    // Initially there are only 4 type nodes for primitive types
+    let nodes: any = {string: {}, number: {}, true: {}, false: {}};
     let edges: any = {};
 
 
@@ -69,7 +72,7 @@ import internalObjects from './internalobjects.js';
      * @param value any value of JavaScript
      * @returns the type representation
      */
-    function getType(value: any) {
+    function getType(value: any) : string | NodeJS.Dict<any> {
         for (let [k, v] of Object.entries(internalObjects)) {
             if (v === value) {
                 return k;
@@ -109,8 +112,38 @@ import internalObjects from './internalobjects.js';
         throw new Error('Unsupported value.');
     }
 
+    function createTypeNode(typeDef: string | NodeJS.Dict<any>): any {
+        if (typeof typeDef === 'string') {
+            return typeDef;
+        }
+
+        if ('__globalid__' in typeDef) {
+            let obj = typeDef['__globalid__'];
+            if (!nodes[typeDef['__globalid__']]) {
+                nodes[typeDef['__globalid__']] = {id: typeDef['__globalid__'], objRef: obj};
+                edges[typeDef['__globalid__']] = {ownProps: {}, calls: [], hasProps: {}};
+            }
+
+            return typeDef['__globalid__'];
+        }
+
+        let hash = objectHash(typeDef);
+        if (nodes['typehash:' + hash]) {
+            return nodes['typehash:' + hash];
+        }
+
+        let typeNode: any = {};
+        for (let x of Object.keys(typeDef)) {
+            typeNode[x] = createTypeNode(typeDef[x]);
+        }
+
+        nodes['typehash:' + hash] = typeNode;
+        return 'tyehash:' + hash;
+    }
+
     async function createCallEdges(func: Function) {
         let calldata = [];
+        let calldataRep = []
         for (let i = 0; i < argv.maxExecutionTime; i++) {
             try {
                 let [thisArg, args, result] = await forcedExecution(func, argv.maxArgNumber);
@@ -118,22 +151,34 @@ import internalObjects from './internalobjects.js';
                     result = await result;
                 }
                 let input = [];
+                let inputRep = [];
                 for (let i = 0; i < args.length; i++) {
-                    input.push(constructValue(replacePlaceholders(args[i])));
+                    let replacedRep = replacePlaceholders(args[i]);
+                    inputRep.push(replacedRep);
+                    input.push(constructValue(replacedRep));
                 }
-
-                calldata.push([constructValue(replacePlaceholders(thisArg)), input]);
+                let replacedRepThisArg = replacePlaceholders(thisArg)
+                calldataRep.push([replacedRepThisArg, inputRep])
+                calldata.push([constructValue(replacedRepThisArg), input]);
             } catch (e) {
                 // ignore
             }
         }
         let calldataReturns = [];
+        let returnTypeMap: NodeJS.Dict<any> = {}
         for (let cd of calldata) {
-            for (let e of cd) {
-                let thisArg = cd[0];
-                let result = func.apply(thisArg, cd[1]);
-                calldataReturns.push(getType(result));
-            }
+            let thisArg = cd[0];
+            let result = func.apply(thisArg, cd[1]);
+            let returnType = getType(result);
+            let returnTypeHash = objectHash(returnType);
+            returnTypeMap[returnTypeHash] = returnType;
+            calldataReturns.push(returnTypeHash);
+        }
+        
+        for (let i = 0; i < calldata.length; i++) {
+            let typeDef = returnTypeMap[calldataReturns[i]!];
+            let typeNodeId = createTypeNode(typeDef);
+            edges[(func as any).__globalid__].calls.push({calldata: calldataRep[i], target: typeNodeId});
         }
         
     }
