@@ -10,6 +10,7 @@ import loadmodule from './loadmodule.js';
 import instrument from './instrument.js';
 import forcedExecution from './forcedexecution.js';
 import { replacePlaceholders } from './value.js';
+import internalObjects from './internalobjects.js';
 
 (async function () {
     const argv: any = yargs(hideBin(process.argv))
@@ -69,6 +70,12 @@ import { replacePlaceholders } from './value.js';
      * @returns the type representation
      */
     function getType(value: any) {
+        for (let [k, v] of Object.entries(internalObjects)) {
+            if (v === value) {
+                return k;
+            }
+        }
+        
         if (value === Symbol.for('Any')) {
             return 'any';
         }
