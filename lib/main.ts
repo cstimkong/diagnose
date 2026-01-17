@@ -26,6 +26,10 @@ import objectHash from 'object-hash';
     const mod = loadmodule(argv.libraryPath as string, instrument);
 
     // Initially there are only 4 type nodes for primitive types
+    // The IDs in nodes and edges:
+    //  object -> a global ID
+    //  type -> a hash string starting with `typehash:`
+    //  special type: a string, 'string', 'number', etc.
     let nodes: any = {string: {}, number: {}, true: {}, false: {}};
     let edges: any = {};
 
@@ -112,6 +116,11 @@ import objectHash from 'object-hash';
         throw new Error('Unsupported value.');
     }
 
+    /**
+     * Create a type node (and subtype nodes) in the graph
+     * @param typeDef the type definition, a string or a dict
+     * @returns the ID of the type node
+     */
     function createTypeNode(typeDef: string | NodeJS.Dict<any>): any {
         if (typeof typeDef === 'string') {
             return typeDef;
