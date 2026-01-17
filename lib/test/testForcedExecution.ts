@@ -13,7 +13,7 @@ import forcedExecution from '../forcedexecution.js'
 
     for (let i = 0; i < 1000; i++) {
         try {
-            let [thisArg, args, result] = await forcedExecution(qs.parse, 3, true);
+            let [thisArg, args, result] = await forcedExecution(qs.stringify, 3, true);
             console.log(thisArg);
             console.log(args);
         } catch (e) {

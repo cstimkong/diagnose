@@ -9,11 +9,7 @@ import process from 'process';
 import loadmodule from './loadmodule.js';
 import instrument from './instrument.js';
 import forcedExecution from './forcedexecution.js';
-import { parseExpression } from '@babel/parser';
-import babelTraverse from '@babel/traverse';
-import { randomChoose, randomNumber, randomString } from './random.js';
-import { numericLiteral, objectExpression, stringLiteral } from '@babel/types';
-import generate from '@babel/generator';
+import { replacePlaceholders } from './value.js';
 
 (async function () {
     const argv: any = yargs(hideBin(process.argv))
@@ -66,35 +62,6 @@ import generate from '@babel/generator';
         return new Function(`return ${valueRep}`)();
     }
 
-    /**
-     * Replace the Any symbols in the value representation.
-     * 
-     * @param valueRep 
-     * @returns the replaced code for the value representation
-     */
-    function replacePlaceholders(valueRep: string): string {
-        let ast = parseExpression(valueRep);
-        babelTraverse(ast, {
-            exit(path) {
-                if (path.isCallExpression()) {
-                    if (valueRep.slice(path.node.start!, path.node.end!) === 'Symbol.for("Any")') {
-                        randomChoose([
-                            function() { path.replaceWith(stringLiteral(randomString())); },
-                            function() { path.replaceWith(numericLiteral(randomNumber())); },
-                            function() { path.replaceWith(objectExpression([])); }
-                        ])
-                    }
-                    if (valueRep.slice(path.node.start!, path.node.end!) === 'Symbol.for("AnyString")') {
-                        path.replaceWith(stringLiteral(randomString()));
-                    }
-                    if (valueRep.slice(path.node.start!, path.node.end!) === 'Symbol.for("AnyNumber")') {
-                        path.replaceWith(numericLiteral(randomNumber()));
-                    }
-                }
-            }
-        });
-        return generate(ast).code;
-    }
 
     /**
      * Get the type representation of a value.
