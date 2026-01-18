@@ -11,6 +11,7 @@ export function __typeofimpl__(value: any) {
     }
     else if (typeof value === 'object') {
         if (value.__typeof__) {
+            console.log(value);
             return value.__typeof__;
         }
         else {

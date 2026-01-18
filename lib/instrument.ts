@@ -1,6 +1,6 @@
 import babelTraverse from '@babel/traverse';
 import { parse, parseExpression, type ParseResult } from '@babel/parser';
-import { objectExpression, objectProperty, callExpression, identifier, stringLiteral } from '@babel/types';
+import { objectExpression, objectProperty, callExpression, identifier, stringLiteral, parenthesizedExpression } from '@babel/types';
 import { generate } from '@babel/generator';
 import babelTemplate from '@babel/template';
 
@@ -85,12 +85,12 @@ export default function(code: string, filename?: string) {
             // Patch typeof operator
             if (path.isUnaryExpression() && path.node.operator === 'typeof') {
                 if (path.node.argument.type === 'Identifier') {
-                    let replaced = babelTemplate('typeof %%VARNAME%% === "undefined" ? undefined : __typeof__(%%VARNAME%%)')({VARNAME: path.node.argument});
-                    path.replaceWith(replaced as any);
+                    let replaced = babelTemplate.expression('typeof %%VARNAME%% === "undefined" ? "undefined" : __typeofimpl__(%%VARNAME%%)')({VARNAME: path.node.argument});
+                    path.replaceWith(parenthesizedExpression(replaced as any));
                 }
                 else {
                     path.replaceWith(callExpression(
-                        identifier('__typeof__'),
+                        identifier('__typeofimpl__'),
                         [path.node.argument]
                     ));
                 }
