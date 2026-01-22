@@ -30,11 +30,8 @@ export const __getGlobalId__ = (function() {
     }
 })();
 
-export function __defineproperty__(obj: any, key: string, value: any) {
-    if (Object.hasOwn(obj, key)) {
-        console.log(obj, key);
-    }
-    return Object.defineProperty(obj, key, { enumerable: false, value: value });
+export function __setglobalid__(obj: any) {
+    return Object.defineProperty(obj, '__globalid__', {value: __getGlobalId__(), enumerable: false});
 }
 
 

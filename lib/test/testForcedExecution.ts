@@ -1,5 +1,4 @@
-import forcedExecution from '../forcedexecution.js'
-
+import forcedExecution from '../forcedexecution.js';
 // let testfunc = function (a: any, b: any, callback: (x: any, y: any) => any) {
 //     ((x) => { })(a.charAt(0) === 'b');
 //     if (b.value < 100) {
@@ -9,11 +8,11 @@ import forcedExecution from '../forcedexecution.js'
 // }
 
 (async function() {
-    var qs = require('../../example_packages/qs.js');
+    var lib = require('../../example_packages/joi.js');
 
-    for (let i = 0; i < 1000; i++) {
+    for (let i = 0; i < 200; i++) {
         try {
-            let [thisArg, args, result] = await forcedExecution(qs.stringify, 3, true);
+            let [thisArg, args, result] = await forcedExecution(lib.string, Math.floor(Math.random() * 6), true);
             console.log(thisArg);
             console.log(args);
         } catch (e) {

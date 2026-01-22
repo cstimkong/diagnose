@@ -1,6 +1,6 @@
 import babelTraverse from '@babel/traverse';
 import { parse, parseExpression, type ParseResult } from '@babel/parser';
-import { objectExpression, objectProperty, callExpression, identifier, stringLiteral, parenthesizedExpression } from '@babel/types';
+import { objectExpression, objectProperty, callExpression, identifier, stringLiteral, parenthesizedExpression, Statement, functionExpression, blockStatement } from '@babel/types';
 import { generate } from '@babel/generator';
 import babelTemplate from '@babel/template';
 
@@ -20,21 +20,61 @@ export default function(code: string, filename?: string) {
     }
 
     babelTraverse(ast, {
+        enter(path) {
+            if (path.isBlock()) {
+                let functionDecls: Statement[] = [];
+                let otherStmts: Statement[] = [];
+                let childPaths = path.get('body');
+                for (let c of childPaths) {
+                    if (c.isFunctionDeclaration()) {
+                        functionDecls.push(c.node);
+                    } else {
+                        otherStmts.push(c.node);
+                    }
+                }
+                path.node.body = functionDecls.concat(otherStmts);
+            }
+        }
+    });
+    
+    babelTraverse(ast, {
         exit(path) {
-            // Set global ID for object allocation sites
-            if (path.isNewExpression() || path.isObjectExpression() || path.isFunctionExpression()) {
-                path.replaceWith(callExpression(
-                    identifier('__defineproperty__'),
-                    [path.node, stringLiteral('__globalid__'), parseExpression('__getGlobalId__()')]
+            // Patch function declarations
+            if (path.isFunctionDeclaration()) {
+                let funcName = path.node.id!.name;
+                path.insertAfter(callExpression(
+                    identifier('__setglobalid__'), [identifier(funcName)]
                 ))
             }
+
+            // Patch class declaration
+            if (path.isClassDeclaration()) {
+                let className = path.node.id!.name;
+                path.insertAfter(callExpression(
+                    identifier('__setglobalid__'),
+                    [identifier(className)]
+                ))
+            }
+
+            if (path.isObjectMethod()) {
+                path.replaceWith(objectProperty(path.node.key, 
+                    callExpression(identifier('__setglobalid__'), [functionExpression(null, path.node.params, path.node.body)])
+                ));
+            }
+
+            // Set global ID for object allocation sites
+            if (path.isNewExpression() || path.isObjectExpression() || path.isFunctionExpression() || path.isClassExpression()) {
+                path.replaceWith(callExpression(
+                    identifier('__setglobalid__'), [path.node]
+                ))
+            }
+
             // Set global ID for the objects created via `Object.create` calls
             if (path.isCallExpression() && path.node.callee.type === 'MemberExpression') {
                 if (path.node.callee.object.type === 'Identifier' && path.node.callee.object.name === 'Object'
                     && path.node.callee.property.type === 'Identifier' && path.node.callee.property.name === 'create') {
                     path.replaceWith(callExpression(
-                        identifier('__defineproperty__'),
-                        [path.node, stringLiteral('__globalid__'), parseExpression('__getGlobalId__()')]
+                        identifier('__setglobalid__'), [path.node]
                     ))
                 }
             }
