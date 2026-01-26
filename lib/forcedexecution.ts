@@ -9,6 +9,7 @@ function getProxy(): any {
     let internalValue: any = undefined;
     let target: any = {};
     let retValues: any[] = [];
+    let elements: any = undefined;
     return new Proxy(function() {}, {
         get(_, p) {
             if (p === '__value__') {
@@ -38,6 +39,14 @@ function getProxy(): any {
                     let result = '{';
                     for (let p of Object.getOwnPropertyNames(target)) {
                         result += `"${p.replace('"', '\\"')}": ${target[p].__value__}, `;
+                    }
+                    if (elements !== undefined) {
+                        let elementRep = '[';
+                        for (let e of elements) {
+                            elementRep += `${e.__value__}, `;
+                        }
+                        elementRep += ']';
+                        result += `[Symbol.iterator]: function() { let e = ${elementRep}, i = 0; return {next: function() { if (i < e.length) {return {value: e[i++], done: false} } else {return {value: undefined, done: true} } } } }`;
                     }
                     result += '}';
                     return result;
@@ -72,6 +81,8 @@ function getProxy(): any {
             if (Object.hasOwn(target, p)) {
                 return target[p];
             }
+            
+            // Special symbol Symbol.toPrimitive
             if (p === Symbol.toPrimitive) {
                 return function(hint: string) {
                     if (internalValue !== undefined) {
@@ -105,6 +116,33 @@ function getProxy(): any {
                     return internalValue;
                 }
             }
+
+            // Special symbol Symbol.iterator
+            if (p === Symbol.iterator) {
+                state = 'object';
+                if (elements === undefined) {
+                    elements = [];
+                    let len = randomNumber(10);
+                    for (let i = 0; i < len; i++) {
+                        elements.push(getProxy());
+                    }
+                }
+                
+                return function() {
+                    let c = 0;
+                    return {
+                        next: function() {
+                            if (c < elements.length) {
+                                return {value: elements[c++], done: false};
+                            }
+                            else {
+                                return {value: undefined, done: true};
+                            }
+                        }
+                    }
+                }
+            }
+
             if (state === 'object') {
                 return randomChoose([
                     () => undefined,

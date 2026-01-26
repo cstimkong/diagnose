@@ -9,14 +9,18 @@ import forcedExecution from '../forcedexecution.js';
 
 (async function() {
     var lib = require('../../example_packages/joi.js');
-
+    function test(x: any) {
+        for (let e of x) {
+            (function() { } as Function)(e);
+        }
+    }
     for (let i = 0; i < 200; i++) {
         try {
-            let [thisArg, args, result] = await forcedExecution(lib.string, Math.floor(Math.random() * 6), true);
+            let [thisArg, args, result] = await forcedExecution(test, Math.floor(Math.random() * 6), true);
             console.log(thisArg);
             console.log(args);
         } catch (e) {
-            // console.log(e);
+
         }
 
     }

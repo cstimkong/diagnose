@@ -8,7 +8,11 @@ export function randomString(): string {
     return str;
 }
 
-export function randomNumber(): number {
+export function randomNumber(limit?: number): number {
+    if (limit) {
+        return Math.floor(Math.random() * limit);
+    }
+    
     return randomChoose([
         function () {
             return Math.floor(Math.random() * 10);
@@ -27,6 +31,7 @@ export function randomNumber(): number {
         },
     ])
 }
+
 /**
  * Randomly choose a function to execute. The function should have no argument.
  * @param funcs Funtion list
