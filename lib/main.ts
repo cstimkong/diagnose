@@ -12,7 +12,7 @@ import forcedExecution from './forcedexecution.js';
 import { replacePlaceholders } from './value.js';
 import internalObjects from './internalobjects.js';
 import objectHash from 'object-hash';
-
+import { __getGlobalId__, __setglobalid__, patchGlobalFunctions } from './patch.js'
 (async function () {
     const argv: any = yargs(hideBin(process.argv))
         .usage('Generate object relation graph for a JavaScript package')
@@ -23,7 +23,11 @@ import objectHash from 'object-hash';
         .demandOption(['library-path'])
         .parse();
 
+    patchGlobalFunctions();
+    (globalThis as any).__enablesetglobalid__ = true;
     const mod = loadmodule(argv.libraryPath as string, instrument);
+    __setglobalid__(mod);
+    (globalThis as any).__enablesetglobalid__ = false;
 
     // Initially there are only 4 type nodes for primitive types
     // The IDs in nodes and edges:
@@ -37,10 +41,11 @@ import objectHash from 'object-hash';
 
     function findNewObjects(obj: any): any[] {
         let result: any[] = [];
-        if (nodes[obj.__globalid__]) {
+        if (Object.hasOwn(obj, '__globalid__') && obj.__globalid__ && nodes[obj.__globalid__]) {
             return [];
         }
-        if (!edges[obj.__globalid__]) {
+
+        if (Object.hasOwn(obj, '__globalid__') && obj.__globalid__ && !edges[obj.__globalid__]) {
             edges[obj.__globalid__] = { ownProps: {}, calls: [], hasProps: {} };
         }
 
@@ -55,10 +60,15 @@ import objectHash from 'object-hash';
         }
 
         for (let x of Object.getOwnPropertyNames(obj)) {
-            if ((typeof obj[x] === 'function' || typeof obj[x] === 'object') && obj[x] !== null && obj[x].__globalid__) {
+            if ((typeof obj[x] === 'function' || typeof obj[x] === 'object') && obj[x] !== null && obj[x].__globalid__ !== undefined) {
                 if (!nodes[obj[x].__globalid__]) {
                     nodes[obj[x].__globalid__] = { id: obj[x].__globalid__, objRef: obj[x], visited: false };
+                    edges[obj[x].__globalid__] = { ownProps: {}, calls: [], hasProp: {} };
+                    if (!edges[obj.__globalid__]) {
+                        edges[obj.__globalid__] = {ownProps: {}, calls: [], hasProps: {}};
+                    }
                     edges[obj.__globalid__].ownProps[x] = obj[x].__globalid__;
+                    result.push(obj[x].__globalid__);
                 }
                 result = result.concat(findNewObjects(obj[x]));
             }
@@ -102,16 +112,28 @@ import objectHash from 'object-hash';
 
         else if (typeof value === 'object') {
             // For the objects initialized in the loading phase
-            if (value.__globalid__) {
-                return {'__globalid__': value.__globalid__};
+            if (Object.hasOwn(value, '__globalid__') && value.__globalid__ !== undefined) {
+                return {'__globalid__': value.__globalid__, value: value};
             }
 
             let result: any = {};
             for (let x of Object.getOwnPropertyNames(value)) {
-                Object.defineProperty(result, x, {value: value[x]});
+                Object.defineProperty(result, x, {value: getType(value[x]), enumerable: true});
             }
             result['[[prototype]]'] = getType(Object.getPrototypeOf(value));
             return result;
+        }
+        else if (typeof value === 'function') {
+            if (Object.hasOwn(value, '__globalid__') && value.__globalid__) {
+                return {'__globalid__': value.__globalid__};
+            }
+            let result: any = {};
+            for (let x of Object.getOwnPropertyNames(value)) {
+                if (['length', 'name', 'arguments', 'caller'].indexOf(x) < 0) {
+                    Object.defineProperty(result, x, {value: value[x]});
+                }
+            }
+            return Object.defineProperty(result, '__functiontype__', {value: true});
         }
 
         throw new Error('Unsupported value.');
@@ -130,7 +152,7 @@ import objectHash from 'object-hash';
         if ('__globalid__' in typeDef) {
             let obj = typeDef['__globalid__'];
             if (!nodes[typeDef['__globalid__']]) {
-                nodes[typeDef['__globalid__']] = {id: typeDef['__globalid__'], objRef: obj};
+                nodes[typeDef['__globalid__']] = {id: typeDef['__globalid__'], objRef: typeDef.value};
                 edges[typeDef['__globalid__']] = {ownProps: {}, calls: [], hasProps: {}};
             }
 
@@ -148,7 +170,7 @@ import objectHash from 'object-hash';
         }
 
         nodes['typehash:' + hash] = typeNode;
-        return 'tyehash:' + hash;
+        return 'typehash:' + hash;
     }
 
     async function createCallEdges(func: Function) {
@@ -157,9 +179,6 @@ import objectHash from 'object-hash';
         for (let i = 0; i < argv.maxExecutionTime; i++) {
             try {
                 let [thisArg, args, result] = await forcedExecution(func, argv.maxArgNumber);
-                if (result instanceof Promise) {
-                    result = await result;
-                }
                 let input = [];
                 let inputRep = [];
                 for (let i = 0; i < args.length; i++) {
@@ -171,7 +190,7 @@ import objectHash from 'object-hash';
                 calldataRep.push([replacedRepThisArg, inputRep])
                 calldata.push([constructValue(replacedRepThisArg), input]);
             } catch (e) {
-                // ignore
+                // console.log(e);
             }
         }
         let calldataReturns = [];
@@ -195,16 +214,22 @@ import objectHash from 'object-hash';
 
     let queue: any[] = [];
     let iterationCount = 0;
-    
+    queue.push(mod);
+
     // main loop
     while (queue.length > 0 && iterationCount < argv.maxIteration) {
         let o = queue.shift();
         let newObjects = findNewObjects(o);
         for (let x of newObjects) {
-            if (typeof x === 'function') {
-                createCallEdges(x);
-            }
+            queue.push(nodes[x].objRef);
         }
+
+        if (typeof o === 'function') {
+            await createCallEdges(o);
+        }
+
         iterationCount += 1;
     }
+    console.log(nodes);
+    console.log(edges);
 })()

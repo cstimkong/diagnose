@@ -23,15 +23,21 @@ export function __typeofimpl__(value: any) {
     }
 }
 
-export const __getGlobalId__ = (function() {
+export const __getGlobalId__ = (function () {
     let i = 0;
-    return function() {
+    return function () {
         return i++;
     }
 })();
 
 export function __setglobalid__(obj: any) {
-    return Object.defineProperty(obj, '__globalid__', {value: __getGlobalId__(), enumerable: false});
+    if ((globalThis as any).__enablesetglobalid__) {
+        Object.defineProperty(obj, '__globalid__', { value: __getGlobalId__(), enumerable: false });
+        if (typeof obj === 'function') {
+            Object.defineProperty(obj.prototype, '__globalid__', {value: __getGlobalId__(), enumerable: false});
+        }
+    }
+    return obj;
 }
 
 
@@ -53,4 +59,21 @@ export function __getownpropertydescriptors__(obj: any) {
         delete o['__globalid__'];
     }
     return o;
+}
+
+/**
+ * Patch the critical global functions related to object manipulation.
+ */
+export function patchGlobalFunctions(globalThisObj?: object) {
+    if (!globalThisObj) {
+        globalThisObj = globalThis;
+    }
+
+    (globalThisObj as any).__getGlobalId__ = __getGlobalId__;
+    (globalThisObj as any).__typeofimpl__ = __typeofimpl__;
+    (globalThisObj as any).__getownpropertynames__ = __getownpropertynames__;
+    (globalThisObj as any).__objectkeys__ = __objectkeys__;
+    (globalThisObj as any).__reflectownkeys__ = __reflectownkeys__;
+    (globalThisObj as any).__getownpropertydescriptors__ = __getownpropertydescriptors__;
+    (globalThisObj as any).__setglobalid__ = __setglobalid__;
 }

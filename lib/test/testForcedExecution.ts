@@ -9,9 +9,9 @@ import forcedExecution from '../forcedexecution.js';
 
 (async function() {
     var lib = require('../../example_packages/joi.js');
-    function test(x: any) {
+    async function test(x: any) {
         for (let e of x) {
-            (function() { } as Function)(e);
+            (function() { } as Function)(e.ID);
         }
     }
     for (let i = 0; i < 200; i++) {

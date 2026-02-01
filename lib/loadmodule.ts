@@ -14,3 +14,4 @@ export default function(path: string, instrumentFunc?: (code: string) => string)
     revert();
     return obj;
 }
+
