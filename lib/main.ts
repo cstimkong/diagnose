@@ -13,6 +13,7 @@ import { replacePlaceholders } from './value.js';
 import internalObjects from './internalobjects.js';
 import objectHash from 'object-hash';
 import { __getGlobalId__, __setglobalid__, patchGlobalFunctions } from './patch.js'
+import { randomNumber } from './random.js';
 (async function () {
     const argv: any = yargs(hideBin(process.argv))
         .usage('Generate object relation graph for a JavaScript package')
@@ -191,7 +192,8 @@ import { __getGlobalId__, __setglobalid__, patchGlobalFunctions } from './patch.
         let calldataRep = []
         for (let i = 0; i < argv.maxExecutionTime; i++) {
             try {
-                let [thisArg, args, result] = await forcedExecution(func, argv.maxArgNumber);
+                let useNew = Math.floor(randomNumber(2)) === 0;
+                let [thisArg, args, result] = await forcedExecution(func, argv.maxArgNumber, false, useNew);
                 let input = [];
                 let inputRep = [];
                 for (let i = 0; i < args.length; i++) {
@@ -201,7 +203,7 @@ import { __getGlobalId__, __setglobalid__, patchGlobalFunctions } from './patch.
                 }
                 let replacedRepThisArg = replacePlaceholders(thisArg)
                 calldataRep.push([replacedRepThisArg, inputRep])
-                calldata.push([constructValue(replacedRepThisArg), input]);
+                calldata.push([constructValue(replacedRepThisArg), input, useNew]);
             } catch (e) {
                 // ignore
             }
@@ -210,7 +212,12 @@ import { __getGlobalId__, __setglobalid__, patchGlobalFunctions } from './patch.
         let returnTypeMap: NodeJS.Dict<any> = {};
         for (let cd of calldata) {
             let thisArg = cd[0];
-            let result = func.apply(thisArg, cd[1]);
+            let result;
+            if (cd[2]) {
+                result = Reflect.construct(func, cd[1]);
+            } else {
+                result = func.apply(thisArg, cd[1]);
+            }
             let returnType = getType(result);
             let returnTypeHash = objectHash(returnType);
             returnTypeMap[returnTypeHash] = returnType;
