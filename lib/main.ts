@@ -39,42 +39,50 @@ import { __getGlobalId__, __setglobalid__, patchGlobalFunctions } from './patch.
     let edges: any = {};
 
 
-    function findNewObjects(obj: any): any[] {
-        let result: any[] = [];
-        if (Object.hasOwn(obj, '__globalid__') && obj.__globalid__ && nodes[obj.__globalid__]) {
+    function findNewObjects(obj: any, depth?: number): any[] {
+        if (typeof obj !== 'object' && typeof obj !== 'function')
             return [];
+        if (obj === null)
+            return[];
+        if (!depth) depth = 0;
+        if (depth && depth > 10)
+            return [];
+        let result: any[] = [];
+
+        if (Object.hasOwn(obj, '__globalid__') && !nodes[obj.__globalid__]) {
+            nodes[obj.__globalid__] = {id: obj.__globalid__, objRef: obj};
+            result.push(obj.__globalid__);
         }
 
-        if (Object.hasOwn(obj, '__globalid__') && obj.__globalid__ && !edges[obj.__globalid__]) {
+        if (Object.hasOwn(obj, '__globalid__') && !edges[obj.__globalid__]) {
             edges[obj.__globalid__] = { ownProps: {}, calls: [], hasProps: {} };
         }
 
         if (typeof obj === 'object' && obj !== null && Object.getPrototypeOf(obj) !== Object.prototype) {
             let proto = Object.getPrototypeOf(obj);
-            if (proto !== null && proto.__globalid__) {
+            if (proto !== null && Object.hasOwn(proto, '__globalid__')) {
                 if (!nodes[proto.__globalid__]) {
                     nodes[proto.__globalid__] = { id: proto.__globalid__, objRef: proto };
                 }
             }
-            result = result.concat(findNewObjects(proto));
+            result = result.concat(findNewObjects(proto, depth + 1));
         }
 
         for (let x of Object.getOwnPropertyNames(obj)) {
-            if ((typeof obj[x] === 'function' || typeof obj[x] === 'object') && obj[x] !== null && obj[x].__globalid__ !== undefined) {
-                if (!nodes[obj[x].__globalid__]) {
+            if ((typeof obj[x] === 'function' || typeof obj[x] === 'object')) {
+                if (obj[x] !== null && Object.hasOwn(obj[x], '__globalid__') && !nodes[obj[x].__globalid__]) {
                     nodes[obj[x].__globalid__] = { id: obj[x].__globalid__, objRef: obj[x], visited: false };
                     edges[obj[x].__globalid__] = { ownProps: {}, calls: [], hasProp: {} };
-                    if (!edges[obj.__globalid__]) {
-                        edges[obj.__globalid__] = {ownProps: {}, calls: [], hasProps: {}};
-                    }
                     edges[obj.__globalid__].ownProps[x] = obj[x].__globalid__;
                     result.push(obj[x].__globalid__);
                 }
-                result = result.concat(findNewObjects(obj[x]));
+                result = result.concat(findNewObjects(obj[x], depth + 1));
             }
         }
-
-        return result;
+        let s = new Set();
+        for (let x of result)
+            s.add(x);
+        return Array.from(s);
     }
     
     function constructValue(valueRep: string): any {
@@ -113,6 +121,11 @@ import { __getGlobalId__, __setglobalid__, patchGlobalFunctions } from './patch.
         else if (typeof value === 'object') {
             // For the objects initialized in the loading phase
             if (Object.hasOwn(value, '__globalid__') && value.__globalid__ !== undefined) {
+                if (!nodes[value.__globalid__]) {
+                    nodes[value.__globalid__] = {id: value.__globalid__, objRef: value};
+                    edges[value.__globalid__] = {ownProps: {}, calls: []};
+                    queue.push(value);
+                }
                 return {'__globalid__': value.__globalid__, value: value};
             }
 
@@ -161,7 +174,7 @@ import { __getGlobalId__, __setglobalid__, patchGlobalFunctions } from './patch.
 
         let hash = objectHash(typeDef);
         if (nodes['typehash:' + hash]) {
-            return nodes['typehash:' + hash];
+            return 'typehash:' + hash;
         }
 
         let typeNode: any = {};
@@ -190,7 +203,7 @@ import { __getGlobalId__, __setglobalid__, patchGlobalFunctions } from './patch.
                 calldataRep.push([replacedRepThisArg, inputRep])
                 calldata.push([constructValue(replacedRepThisArg), input]);
             } catch (e) {
-                // console.log(e);
+                // ignore
             }
         }
         let calldataReturns = [];
@@ -209,7 +222,6 @@ import { __getGlobalId__, __setglobalid__, patchGlobalFunctions } from './patch.
             let typeNodeId = createTypeNode(typeDef);
             edges[(func as any).__globalid__].calls.push({calldata: calldataRep[i], target: typeNodeId});
         }
-        
     }
 
     let queue: any[] = [];
@@ -219,7 +231,7 @@ import { __getGlobalId__, __setglobalid__, patchGlobalFunctions } from './patch.
     // main loop
     while (queue.length > 0 && iterationCount < argv.maxIteration) {
         let o = queue.shift();
-        let newObjects = findNewObjects(o);
+        let newObjects = findNewObjects(o, 0);
         for (let x of newObjects) {
             queue.push(nodes[x].objRef);
         }
@@ -231,5 +243,5 @@ import { __getGlobalId__, __setglobalid__, patchGlobalFunctions } from './patch.
         iterationCount += 1;
     }
     console.log(nodes);
-    console.log(edges);
+    console.log(edges[0]);
 })()
