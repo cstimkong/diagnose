@@ -14,6 +14,8 @@ import internalObjects from './internalobjects.js';
 import objectHash from 'object-hash';
 import { __getGlobalId__, __setglobalid__, patchGlobalFunctions } from './patch.js'
 import { randomNumber } from './random.js';
+import { writeFileSync } from 'fs';
+
 (async function () {
     const argv: any = yargs(hideBin(process.argv))
         .usage('Generate object relation graph for a JavaScript package')
@@ -21,6 +23,7 @@ import { randomNumber } from './random.js';
         .option('max-execution-time', { type: 'number', default: 100 })
         .option('max-iteration', {type: 'number', default: 100})
         .option('max-arg-number', { type: 'number', default: 5 })
+        .option('output-path', {type: 'string'})
         .demandOption(['library-path'])
         .parse();
 
@@ -39,6 +42,36 @@ import { randomNumber } from './random.js';
     let nodes: any = {string: {}, number: {}, true: {}, false: {}};
     let edges: any = {};
 
+
+    function deepClone(obj: any): any {
+        if (typeof obj === 'object' && obj !== null) {
+            let o: any = {};
+            for (let key of Object.keys(obj)) {
+                if (key === 'objRef') {
+                    continue;
+                }
+                o[key] = deepClone(obj[key]);
+            }
+            return o;
+        }
+        else if (Array.isArray(obj)) {
+            let o = [];
+            for (let x of obj) {
+                o.push(deepClone(x));
+            }
+            return o;
+        }
+        else {
+            return obj;
+        }
+    }
+
+    function exportGraph() {
+        return {
+            nodes: deepClone(nodes),
+            edges: deepClone(edges)
+        }
+    }
 
     function findNewObjects(obj: any, depth?: number): any[] {
         if (typeof obj !== 'object' && typeof obj !== 'function')
@@ -249,6 +282,10 @@ import { randomNumber } from './random.js';
 
         iterationCount += 1;
     }
-    console.log(nodes);
-    console.log(edges[0]);
+
+    if (argv.outputPath) {
+        let data = exportGraph();
+        writeFileSync(argv.outputPath, JSON.stringify(data));
+    }
+
 })()

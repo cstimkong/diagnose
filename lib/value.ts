@@ -1,5 +1,5 @@
 import { parseExpression } from "@babel/parser";
-import babelTraverse from '@babel/traverse';
+import babelTraverse from "@babel/traverse";
 import { randomChoose, randomString, randomNumber } from "./random";
 import {generate} from '@babel/generator';
 import { stringLiteral, numericLiteral, objectExpression } from "@babel/types";
