@@ -22,7 +22,7 @@ import { writeFileSync } from 'fs';
     const argv: any = yargs(hideBin(process.argv))
         .usage('Generate object relation graph for a JavaScript package')
         .option('library-path', { alias: 'l', type: 'string' })
-        .option('max-execution-time', { type: 'number', default: 100 })
+        .option('max-execution-time', { type: 'number', default: 1000 })
         .option('max-iteration', {type: 'number', default: 100})
         .option('max-arg-number', { type: 'number', default: 5 })
         .option('output-path', {type: 'string'})
@@ -48,20 +48,20 @@ import { writeFileSync } from 'fs';
 
 
     function deepClone(obj: any): any {
-        if (typeof obj === 'object' && obj !== null) {
+        if (Array.isArray(obj)) {
+            let o = [];
+            for (let x of obj) {
+                o.push(deepClone(x));
+            }
+            return o;
+        }
+        else if (typeof obj === 'object' && obj !== null) {
             let o: any = {};
             for (let key of Object.keys(obj)) {
                 if (key === 'objRef') {
                     continue;
                 }
                 o[key] = deepClone(obj[key]);
-            }
-            return o;
-        }
-        else if (Array.isArray(obj)) {
-            let o = [];
-            for (let x of obj) {
-                o.push(deepClone(x));
             }
             return o;
         }
@@ -109,7 +109,7 @@ import { writeFileSync } from 'fs';
         for (let x of Object.getOwnPropertyNames(obj)) {
             if ((typeof obj[x] === 'function' || typeof obj[x] === 'object')) {
                 if (obj[x] !== null && Object.hasOwn(obj[x], '__globalid__') && !nodes[obj[x].__globalid__]) {
-                    nodes[obj[x].__globalid__] = { id: obj[x].__globalid__, objRef: obj[x], visited: false };
+                    nodes[obj[x].__globalid__] = { id: obj[x].__globalid__, objRef: obj[x] };
                     edges[obj[x].__globalid__] = { ownProps: {}, calls: [], hasProp: {} };
                     edges[obj.__globalid__].ownProps[x] = obj[x].__globalid__;
                     result.push(obj[x].__globalid__);
@@ -238,10 +238,11 @@ import { writeFileSync } from 'fs';
                     inputRep.push(replacedRep);
                     input.push(constructValue(replacedRep));
                 }
-                let replacedRepThisArg = replacePlaceholders(thisArg)
-                calldataRep.push([replacedRepThisArg, inputRep])
+                let replacedRepThisArg = replacePlaceholders(thisArg);
+                calldataRep.push([replacedRepThisArg, inputRep]);
                 calldata.push([constructValue(replacedRepThisArg), input, useNew]);
             } catch (e) {
+                console.log(func.toString(), e);
                 // ignore
             }
         }
@@ -251,6 +252,7 @@ import { writeFileSync } from 'fs';
             let thisArg = cd[0];
             let result;
             if (cd[2]) {
+                console.log(func, cd[1]);
                 result = Reflect.construct(func, cd[1]);
             } else {
                 result = func.apply(thisArg, cd[1]);
@@ -286,10 +288,11 @@ import { writeFileSync } from 'fs';
 
         iterationCount += 1;
     }
-
+    let outputData = exportGraph();
     if (argv.outputPath) {
-        let data = exportGraph();
-        writeFileSync(argv.outputPath, JSON.stringify(data));
+        writeFileSync(argv.outputPath, JSON.stringify(outputData));
+    } else {
+        console.log(JSON.stringify(outputData));
     }
 
 })()

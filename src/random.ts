@@ -2,8 +2,9 @@
 export function randomString(): string {
     let length = Math.floor(Math.random() * 10);
     let str = '';
+    let chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%^&*().,/\\? '
     for (let i = 0; i < length; i++) {
-        str += String.fromCharCode(Math.floor(Math.random() * 26) + 97); // a-z
+        str += chars[Math.floor(Math.random() * chars.length)];
     }
     return str;
 }

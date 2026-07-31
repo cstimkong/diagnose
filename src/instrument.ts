@@ -1,6 +1,6 @@
 import babelTraverse from '@babel/traverse';
 import { parse, ParseResult} from '@babel/parser';
-import { objectExpression, objectProperty, callExpression, identifier, stringLiteral, parenthesizedExpression, Statement, functionExpression, blockStatement } from '@babel/types';
+import { objectProperty, callExpression, identifier, stringLiteral, parenthesizedExpression, Statement, functionExpression, blockStatement, Expression } from '@babel/types';
 import { generate } from '@babel/generator';
 import babelTemplate from '@babel/template';
 
@@ -134,6 +134,13 @@ export default function(code: string, filename?: string) {
                         [path.node.argument]
                     ));
                 }
+            }
+
+            if (path.isBinaryExpression() && path.get('left').isExpression() && (path.node.operator === '===' || path.node.operator === '==')) {
+                path.replaceWith(callExpression(
+                    identifier('__comparison__'),
+                    [path.node.left as Expression, path.node.right, stringLiteral(path.node.operator)]
+                ));
             }
             path.skip();
         }
