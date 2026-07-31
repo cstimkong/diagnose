@@ -239,7 +239,7 @@ import { writeFileSync } from 'fs';
                     input.push(constructValue(replacedRep));
                 }
                 let replacedRepThisArg = replacePlaceholders(thisArg);
-                calldataRep.push([replacedRepThisArg, inputRep]);
+                calldataRep.push([replacedRepThisArg, inputRep, useNew]);
                 calldata.push([constructValue(replacedRepThisArg), input, useNew]);
             } catch (e) {
                 console.log(func.toString(), e);
