@@ -1,14 +1,16 @@
 /**
  * 
- * Entry file of Diagnose
+ * Generate graph for a JavaScript library.
+ * 
+ * This file is part of Diagnose.
  */
 
 import { hideBin } from 'yargs/helpers';
 import yargs from 'yargs';
 import process from 'process';
-import loadmodule from './loadmodule.js';
+import loadmodule from './load-module.js';
 import instrument from './instrument.js';
-import forcedExecution from './forcedexecution.js';
+import forcedExecution from './forced-execution.js';
 import { replacePlaceholders } from './value.js';
 import internalObjects from './internalobjects.js';
 import objectHash from 'object-hash';
@@ -30,7 +32,9 @@ import { writeFileSync } from 'fs';
     patchGlobalFunctions();
     (globalThis as any).__enablesetglobalid__ = true;
     const mod = loadmodule(argv.libraryPath as string, instrument);
-    __setglobalid__(mod);
+    if (!mod.__globalid__) {
+        __setglobalid__(mod);
+    }
     (globalThis as any).__enablesetglobalid__ = false;
 
     // Initially there are only 4 type nodes for primitive types
@@ -226,7 +230,7 @@ import { writeFileSync } from 'fs';
         for (let i = 0; i < argv.maxExecutionTime; i++) {
             try {
                 let useNew = Math.floor(randomNumber(2)) === 0;
-                let [thisArg, args, result] = await forcedExecution(func, argv.maxArgNumber, false, useNew);
+                let {thisArg, args, } = await forcedExecution(func, argv.maxArgNumber, false, useNew);
                 let input = [];
                 let inputRep = [];
                 for (let i = 0; i < args.length; i++) {

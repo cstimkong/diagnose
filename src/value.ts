@@ -1,6 +1,6 @@
 import { parseExpression } from "@babel/parser";
 import babelTraverse from "@babel/traverse";
-import { randomChoose, randomString, randomNumber } from "./random";
+import { randomChoose, randomString, randomNumber } from "./random.js";
 import {generate} from '@babel/generator';
 import { stringLiteral, numericLiteral, objectExpression } from "@babel/types";
 
@@ -12,7 +12,7 @@ import { stringLiteral, numericLiteral, objectExpression } from "@babel/types";
  */
 export function replacePlaceholders(valueRep: string): string {
     let ast = parseExpression(valueRep);
-    babelTraverse(ast, {
+    babelTraverse.default(ast, {
         noScope: true,
         exit(path) {
             if (path.isCallExpression()) {

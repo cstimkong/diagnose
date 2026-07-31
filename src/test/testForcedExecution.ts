@@ -1,4 +1,4 @@
-import forcedExecution from '../forcedexecution.js';
+import forcedExecution from '../forced-execution.js';
 // let testfunc = function (a: any, b: any, callback: (x: any, y: any) => any) {
 //     ((x) => { })(a.charAt(0) === 'b');
 //     if (b.value < 100) {
@@ -16,7 +16,7 @@ import forcedExecution from '../forcedexecution.js';
     }
     for (let i = 0; i < 200; i++) {
         try {
-            let [thisArg, args, result] = await forcedExecution(test, Math.floor(Math.random() * 6), true);
+            let {thisArg, args, result} = await forcedExecution(test, Math.floor(Math.random() * 6), true);
             console.log(thisArg);
             console.log(args);
         } catch (e) {

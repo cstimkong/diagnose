@@ -1,5 +1,5 @@
 import babelTraverse from '@babel/traverse';
-import { parse, parseExpression, type ParseResult } from '@babel/parser';
+import { parse, ParseResult} from '@babel/parser';
 import { objectExpression, objectProperty, callExpression, identifier, stringLiteral, parenthesizedExpression, Statement, functionExpression, blockStatement } from '@babel/types';
 import { generate } from '@babel/generator';
 import babelTemplate from '@babel/template';
@@ -19,7 +19,7 @@ export default function(code: string, filename?: string) {
         ast = parse(code);
     }
 
-    babelTraverse(ast, {
+    babelTraverse.default(ast, {
         enter(path) {
             if (path.isBlock()) {
                 let functionDecls: Statement[] = [];
@@ -37,7 +37,7 @@ export default function(code: string, filename?: string) {
         }
     });
     
-    babelTraverse(ast, {
+    babelTraverse.default(ast, {
         exit(path) {
             // Patch function declarations
             if (path.isFunctionDeclaration()) {

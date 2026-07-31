@@ -1,4 +1,4 @@
-import loadmodule from '../loadmodule.js';
+import loadmodule from '../load-module.js';
 import {resolve, join} from 'path';
 import instrument from '../instrument.js';
 import { __getGlobalId__, __typeofimpl__, __setglobalid__, 

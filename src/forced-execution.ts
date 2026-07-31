@@ -240,7 +240,7 @@ function getValueRepresentation(value: any) {
  * @param thisArg whether to set a proxy object for thisArg
  * @returns the representation of thisArg, arguments and the concrete value of the result
  */
-export default async function(func: Function, argNum: number, thisArg?: boolean, construct?: boolean): Promise<[any, any[], any]> {
+export default async function(func: Function, argNum: number, thisArg?: boolean, construct?: boolean) {
     let args = [];
     for (let i = 0; i < argNum; i++) {
         args.push(getProxy());
@@ -259,5 +259,5 @@ export default async function(func: Function, argNum: number, thisArg?: boolean,
     for (let i = 0; i < args.length; i++) {
         argReps.push(getValueRepresentation(args[i]));
     }
-    return [getValueRepresentation(thisArg), argReps, result];
+    return {thisArg: getValueRepresentation(thisArg), args: argReps, result: result};
 }
