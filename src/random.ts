@@ -1,4 +1,9 @@
 
+/**
+ * 
+ * This file is part of Diagnose.
+ */
+
 export function randomString(): string {
     let length = Math.floor(Math.random() * 10);
     let str = '';

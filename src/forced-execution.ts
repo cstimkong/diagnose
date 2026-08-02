@@ -1,6 +1,8 @@
 /**
  * 
- * Forced Execution
+ * Forced Execution.
+ * 
+ * This file is part of Diagnose.
  */
 import { randomString, randomNumber, randomChoose, randomSample } from './random.js';
 
