@@ -1,3 +1,9 @@
+/**
+ * Instrumentation for forced execution.
+ * 
+ * This file is part of Diagnose.
+ */
+
 import babelTraverse from '@babel/traverse';
 import { parse, ParseResult} from '@babel/parser';
 import { objectProperty, callExpression, identifier, stringLiteral, parenthesizedExpression, Statement, functionExpression, blockStatement, Expression } from '@babel/types';

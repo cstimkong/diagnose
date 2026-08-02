@@ -46,7 +46,8 @@ import { writeFileSync } from 'fs';
     let nodes: any = {string: {}, number: {}, true: {}, false: {}};
     let edges: any = {};
 
-
+    nodes[mod.__globalid__] = {id: mod.__globalid__, objRef: mod, start: true};
+    
     function deepClone(obj: any): any {
         if (Array.isArray(obj)) {
             let o = [];

@@ -131,6 +131,7 @@ function getValueRepresentation(value: any) {
  */
 export default async function (func: Function, argNum: number, thisArg?: boolean, construct?: boolean) {
     let args = [];
+    let _async = false;
     for (let i = 0; i < argNum; i++) {
         args.push(randomChoose([
             () => getProxy(),
@@ -152,11 +153,12 @@ export default async function (func: Function, argNum: number, thisArg?: boolean
         result = func.apply(thisArgValue, args);
     }
     if (result instanceof Promise) {
+        _async = true;
         result = await result;
     }
     let argReps = [];
     for (let i = 0; i < args.length; i++) {
         argReps.push(getValueRepresentation(args[i]));
     }
-    return { thisArg: getValueRepresentation(thisArg), args: argReps, result: result };
+    return { thisArg: getValueRepresentation(thisArg), args: argReps, result: result, async: _async };
 }

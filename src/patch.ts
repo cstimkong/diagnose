@@ -1,3 +1,9 @@
+/**
+ * 
+ * Patch for forced execution.
+ * 
+ * This file is part of Diagnose.
+ */
 import { randomChoose } from "./random.js";
 
 export function __typeofimpl__(value: any) {
