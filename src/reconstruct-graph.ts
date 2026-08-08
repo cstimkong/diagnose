@@ -15,6 +15,7 @@ const argv: any = yargs(hideBin(process.argv))
 .usage('Reconstruct graph to detect breaking changes for a JavaScript library')
 .option('graph-path', {alias: 'g', type: 'string'})
 .option('library-path', {alias: 'l', type: 'string'})
+.option('max-iteration', {type: 'number', default: 1000})
 .demandOption(['graph-path', 'library-path'])
 .parse();
 
@@ -38,17 +39,18 @@ const r = createRequire('file://' + cwd() + '/');
     let c = entryNodeId;
     content.nodes[c].objRef = r(argv.libraryPath);
 
-    function findNewObjects(nodeId: any) {
+    function findNewObjects(nodeId: string | number) {
         let q = [nodeId];
         while (q.length > 0) {
-            let id = q.shift();
+            let id = (q.shift() as number);
             for (let [prop, oid] of Object.entries(content.edges[id].ownProps)) {
                 if (Object.hasOwn(content.nodes[(oid as string)], 'objRef')) {
                     if (content.nodes[id].objRef[prop] === undefined) {
                         console.error('Cannot find property.');
+                    } else {
+                        content.nodes[(oid as string)].objRef = content.nodes[id].objRef[prop];
+                        q.push((oid as string));
                     }
-                    content.nodes[(oid as string)].objRef = content.nodes[id].objRef[prop];
-                    q.push(oid);
                 }
             }
         }
@@ -98,8 +100,10 @@ const r = createRequire('file://' + cwd() + '/');
             checkTypeConsistency(result, c.target);
         }
     }
-
-    while (true) {
-        // TODO
+    
+    let iteration = 0;
+    while (iteration < argv.maxIteration) {
+        findNewObjects(entryNodeId);
+        iteration += 1;
     }
 })()
