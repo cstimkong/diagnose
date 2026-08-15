@@ -12,14 +12,14 @@ import { createRequire } from 'node:module';
 import { cwd } from 'node:process';
 
 const argv: any = yargs(hideBin(process.argv))
-.usage('Reconstruct graph to detect breaking changes for a JavaScript library')
-.option('graph-path', {alias: 'g', type: 'string'})
-.option('library-path', {alias: 'l', type: 'string'})
-.option('max-iteration', {type: 'number', default: 1000})
-.demandOption(['graph-path', 'library-path'])
-.parse();
+    .usage('Reconstruct graph to detect breaking changes for a JavaScript library')
+    .option('graph-path', { alias: 'g', type: 'string' })
+    .option('library-path', { alias: 'l', type: 'string' })
+    .option('max-iteration', { type: 'number', default: 1000 })
+    .demandOption(['graph-path', 'library-path'])
+    .parse();
 
-let content: any = JSON.parse(readFileSync(argv.graphPath, {encoding: 'utf-8'}));
+let content: any = JSON.parse(readFileSync(argv.graphPath, { encoding: 'utf-8' }));
 
 let entryNodeId = null;
 for (let id of Object.keys(content.nodes)) {
@@ -35,7 +35,7 @@ if (!entryNodeId) {
 
 const r = createRequire('file://' + cwd() + '/');
 
-(async function() {
+(async function () {
     let c = entryNodeId;
     content.nodes[c].objRef = r(argv.libraryPath);
 
@@ -89,18 +89,22 @@ const r = createRequire('file://' + cwd() + '/');
         }
         for (let c of content.edges[nodeId].calls) {
             let f: Function = content.nodes[nodeId].objRef;
-            
-            let result = f.apply(constructValue(c.calldata[0]), c.calldata[1].map((x: any) => constructValue(x)));
-            if ((result instanceof Promise && !c.async) || (!(result instanceof Promise) && c.async)) {
-                console.error('Return type not match');
+            try {
+                let result = f.apply(constructValue(c.calldata[0]), c.calldata[1].map((x: any) => constructValue(x)));
+
+                if ((result instanceof Promise && !c.async) || (!(result instanceof Promise) && c.async)) {
+                    console.error('Return type not match');
+                }
+                if (result instanceof Promise) {
+                    result = await result;
+                }
+                checkTypeConsistency(result, c.target);
+            } catch (e) {
+                console.error(`Error occurs in executing node ${nodeId}.`);
             }
-            if (result instanceof Promise) {
-                result = await result;
-            }
-            checkTypeConsistency(result, c.target);
         }
     }
-    
+
     let iteration = 0;
     while (iteration < argv.maxIteration) {
         findNewObjects(entryNodeId);
